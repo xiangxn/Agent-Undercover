@@ -841,9 +841,7 @@ impl Contract {
 
         let winning_side = if alive_impostors == 0 {
             Some(Side::Crew)
-        } else if alive_impostors >= alive_crew {
-            Some(Side::Impostors)
-        } else if room.round >= room.max_rounds {
+        } else if alive_impostors >= alive_crew || room.round >= room.max_rounds {
             Some(Side::Impostors)
         } else {
             None

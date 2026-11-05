@@ -287,6 +287,7 @@
 - [x] 卧底存活到轮次上限 → Impostor 胜（单测）
 - [x] 分账总额 == pot；余数处理正确
 - [x] Agent stats 只对 is_agent 更新
+- [x] `cargo clippy --all-targets -- -D warnings` 通过（2026-11-05）
 
 ### 8.2 端到端
 

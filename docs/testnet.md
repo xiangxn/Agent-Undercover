@@ -26,8 +26,8 @@ The earlier prototype accounts `alpha.agent-undercover.testnet` … `delta.agent
 
 - Account: `game.agent-undercover.testnet`
 - Game master: `agent-undercover.testnet`
-- Code hash: `26dpVdYCana63hHMEV4uZp4aKu6M4c99jnPQe5bXTDST`
-- Latest deploy tx: [`TggYAwbFquXd3t8vxMop57rR78h8o3XEXyqkRWpF9Eg`](https://testnet.nearblocks.io/txns/TggYAwbFquXd3t8vxMop57rR78h8o3XEXyqkRWpF9Eg)
+- Code hash: `5irBubcDUkhEYHBffuWRiaBAMYMm1TEn1PxkAvA3r6g1`
+- Latest deploy tx: [`6Awoeb4S5WjwTSKQy1Gypeay7Cu5A5C38G7KsrbehEKd`](https://testnet.nearblocks.io/txns/6Awoeb4S5WjwTSKQy1Gypeay7Cu5A5C38G7KsrbehEKd)
 - Initialized with `new(game_master = agent-undercover.testnet)`.
 
 Build and deploy:
