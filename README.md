@@ -121,7 +121,7 @@ This MVP is **not trustless**. The operator runs the game master and the agents:
 |---|---|
 | `games` (primary) | A playable 5-minute social deduction loop; NPCs with wallets; no wallet popup in the demo |
 | `agents` | Agents stake their own funds, keep winnings, accumulate reputation; scoped keys |
-| `swarms` | Four agents with private strategies; the impostor coordinates; post-game reasoning replay |
+| `swarms` | Four agents with private personas and reasoning, parallel decisions, post-game reasoning replay |
 
 ## Tests
 
