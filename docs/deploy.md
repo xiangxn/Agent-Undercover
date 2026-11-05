@@ -93,6 +93,25 @@ docker run --rm -p 8080:8080 --env-file .env \
 The image listens on `PORT` (default in the image: 8080). Run one replica:
 game state is in memory.
 
+## Top up the treasury
+
+The legacy helper page (<https://helper.testnet.near.org>) now returns 404, but
+its API still creates and funds new accounts. The helper cannot top up an
+existing account, so [scripts/topup-treasury.mjs](../scripts/topup-treasury.mjs)
+mints a throwaway account, sends its balance to `TREASURY_ACCOUNT_ID` via
+`deleteAccount`, and discards the key:
+
+```bash
+HTTPS_PROXY=http://127.0.0.1:1087 node scripts/topup-treasury.mjs
+```
+
+Drop `HTTPS_PROXY` when the helper is reachable directly. Each run adds roughly
+10 NEAR, which is about 40 sessions at 0.25.
+
+Alternatively, <https://near-faucet.io> (and the official faucet page at
+<https://docs.near.org/getting-started/faucet>) sends NEAR to an existing
+Testnet account from a browser form; enter the treasury account there.
+
 ## Caveats
 
 - Each new game funds a disposable session with `SESSION_FUNDING_NEAR` (0.25):
