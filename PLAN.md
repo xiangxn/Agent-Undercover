@@ -119,7 +119,9 @@
 - [x] Hosted deploy（Backend + Web）（2026-11-05 Render 新账号要求绑卡，改用 Railway：`https://agent-undercover-production.up.railway.app`；`SESSION_FUNDING_NEAR=0.25` 覆盖 0.1 质押 + ~0.1 房间存储，低于 0.22 拒绝启动；重新部署后浏览器 smoke 完整两局：Crew 胜、分账正确、7 张推理卡、0 console error）
 - [x] Hosted treasury 充值路径：helper 网页已 404 但 `POST /account` 仍可开户，`scripts/topup-treasury.mjs` 用临时账户 + `deleteAccount` 扫入 treasury；当前约 21.8 NEAR（≈87 局）
 - [x] 部署预算保护：treasury/master 余额下限、`MAX_SESSIONS` 上限；server typecheck 通过
+- [x] Master 余额自动补充（2026-11-06）：`start_game`/`advance` 的合约存储由 master 支付（约 0.1 NEAR/局），余额低于 0.5 时从 treasury 自动转入 2 NEAR；补款路径已实测，本地对局恢复
 - [x] Demo UI 游戏化（2026-11-06）：座位发言气泡 + 打字机、身份卡发牌翻牌、实时票数条、回合裁决卡（EXILED 印章 + 角色翻牌）、结果页 IMPOSTOR CAUGHT/ESCAPED 印章；只向客户端暴露已放逐者角色；本地 3 局验证 + 最终 browser smoke（2 轮、Crew 胜、7 张推理卡、0 console error）
+- [x] 回合观感补充（2026-11-06）：每回合开场 `ROUND n` 横幅、最后 10 秒计时器脉冲；截图验证 + 完整一局 smoke（0 console error）
 - [ ] **23:59 UTC 功能冻结**
 - [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；当前工作树 scripted demo 复跑 exit 0；2026-11-05 fresh clone 全流程验证通过
 
