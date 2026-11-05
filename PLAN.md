@@ -11,16 +11,16 @@
 
 ## 1. 成功标准（Definition of Done）
 
-- [ ] 公开 GitHub repo，含 MIT LICENSE，README 可让陌生人从零跑起来
+- [x] 公开 GitHub repo，含 MIT LICENSE，README 可让陌生人从零跑起来（2026-11-06 匿名 API 200）
 - [x] 合约部署在 NEAR Testnet，地址写进 README（`game.agent-undercover.testnet` 已部署并初始化）
 - [x] 4 个 Agent 持久子账户，`view_access_keys` 显示只有 scoped FunctionCall key，无 full-access key（2026-11-05 raw RPC 复核：每个账户恰好两个 FunctionCall key）
 - [x] `pnpm demo:scripted` 不需要 AI API key，能在 Testnet 跑完一局 5 人局并结算（2026-11-05 复跑 exit 0：Crew 胜，4 winners，5 条描述 / 5 个 reveal）
 - [x] `DEMO_MODE=live` 用 NEAR AI Cloud 跑完一局，AI 输出可读、可回放（2026-11-06：GLM 5.3 Flash，连续 5 局浏览器对局；修复推理模型空 content、suspect 带账户后缀、整词校验误判后，最后一局 7/7 AI 决策、0 重试、0 fallback、0 console error；AI 会引用他人描述并指出真人含糊发言）
 - [x] 浏览器里 1 真人 + 4 Agent 完整玩一局：质押 → 描述 → commit-reveal 投票 → 放逐 → 结算（2026-11-05 run 20 完整走通）
 - [x] 结果页展示：胜方、分账、Agent 余额变化、Explorer 链接、AI 私有推理回放（2026-11-05 run 20：7 张推理卡，0 console error）
-- [ ] 60–90 秒 demo 视频已发布到 X，满足 HACKATHON.md 的 tag 要求
-- [ ] 提交 payload 已打印并由 human 确认，POST 返回 201
-- [ ] Hosted demo（加分项）保持可访问到 2026-11-18
+- [x] 60–90 秒 demo 视频已发布到 X，满足 HACKATHON.md 的 tag 要求（2026-11-06；82.814s；https://x.com/necklace_btc/status/2118430392734888088）
+- [x] 提交 payload 已打印并由 human 确认；2026-11-06 已提交，nearhackathon.com 已可见（未记录 HTTP 201）
+- [ ] Hosted demo（加分项）保持可访问到 2026-11-18（截至 2026-11-06 可访问；保留期持续跟进）
 
 ---
 
@@ -44,7 +44,7 @@
 | S1 | README | 英文、机器可读、run steps、架构、trust model、track mapping | Claude 起草，human 审 |
 | S2 | RULES/ARCHITECTURE | 规则、信任模型、合约接口 | Claude |
 | S3 | 测试网地址 | 合约 + Agent 账户 + Explorer 链接 | Claude |
-| S4 | Demo 视频 | 60–90s，含一个完整链上结算瞬间 | human 录制/发布；Claude 写脚本/剪辑建议 |
+| S4 | Demo 视频 | 60–90s，含一个完整链上结算瞬间 | human 只录一局原始素材并发布；Claude 自动剪辑/字幕/旁白 |
 | S5 | X post | 含 built at NEAR HACKATHON、@NEARProtocol、#NEARHackathon、视频 | human 发布；Claude 起草 |
 | S6 | Hosted demo | Vercel + Render，保留到 11-18 | Claude 部署；human 确认 |
 | S7 | 提交 payload | 完整 JSON、字段校验、requestId | Claude 起草；human 确认后发送 |
@@ -130,15 +130,15 @@
 
 **目标：提交材料 + 发布 + 提交（M4）**
 
-- [ ] Hosted demo smoke test（无痕窗口/手机）
-- [ ] README 最终版：Testnet 地址、Explorer、视频、hosted demo、track mapping
-- [ ] 录制/剪辑 60–90s 视频（human）
-- [ ] 发布 X post（human，草稿见第 6 节）
-- [ ] repo 设为 public（human）
-- [ ] 生成 requestId，打印完整 payload（**不发送**）
-- [ ] human 确认 payload + consent
-- [ ] POST 提交，目标 20:00 UTC 前拿到 201
-- [ ] 验收：201；保存响应；hosted demo 保留到 11-18
+- [ ] Hosted demo smoke test（无痕窗口/手机）（2026-11-06 /api/health ok；完整一局未记录）
+- [x] README 最终版：Testnet 地址、Explorer、视频、hosted demo、track mapping（2026-11-06 视频已放入 docs/，README 已补链接；待 push）
+- [x] 录一局原始素材（human）；Claude 自动剪辑/字幕/旁白，human 审片后发布（2026-11-06，成片 82.8s）
+- [x] 发布 X post（human，草稿见第 6 节；2026-11-06：https://x.com/necklace_btc/status/2118430392734888088）
+- [x] repo 设为 public（human；2026-11-06 匿名 API 200）
+- [x] 生成 requestId，打印完整 payload（**不发送**；requestId 只存本地 `.submission-request-id`，不公开）
+- [x] human 确认 payload + consent（2026-11-06）
+- [x] 提交（2026-11-06；nearhackathon.com 已可见；通过网页表单，未记录 HTTP 201）
+- [ ] 验收：201；保存响应；hosted demo 保留到 11-18（提交已可见；201/响应未保存；保留期至 11-18）
 
 **Slip 规则**：任何一天落后，优先砍第 9 节的功能，不移动 11-09 提交目标；11-10～11-14 是官方缓冲，只修 bug/补材料。
 
@@ -165,32 +165,32 @@
 
 ### 4.2 Demo
 
-- [ ] 视频 ≤ 90s，展示一个完整链上结算瞬间
-- [ ] 视频里能看清 Agent 子账户余额变化 / Explorer
-- [ ] X post 公开，含：
-  - [ ] “built at NEAR HACKATHON”
-  - [ ] `@NEARProtocol`
-  - [ ] `#NEARHackathon`
+- [x] 视频 ≤ 90s，展示一个完整链上结算瞬间（82.8s）
+- [x] 视频里能看清 Agent 子账户余额变化 / Explorer（分账表 + 账户链接清晰）
+- [x] X post 公开，含（2026-11-06 已核验：82.814s 视频附件）：
+  - [x] “built at NEAR HACKATHON”
+  - [x] `@NEARProtocol`
+  - [x] `#NEARHackathon`
   - [ ] （可选）`@NearLegion` `@NearBuilders`
-  - [ ] 视频或截图附件
-  - [ ] demo + repo 链接
-- [ ] Hosted demo 可访问（加分），保留到 2026-11-18
+  - [x] 视频或截图附件
+  - [x] demo + repo 链接
+- [x] Hosted demo 可访问（加分；2026-11-06 /api/health ok），保留到 2026-11-18 持续跟进
 
 ### 4.3 表单
 
-- [ ] projectName: `Agent Undercover`
-- [ ] leadName: `Necklace`
-- [ ] email: `necklace1982@gmail.com`
-- [ ] size: `1`
-- [ ] tracks: `["games","agents","swarms"]`
-- [ ] nearAddress: `x-bit.near`
+- [x] projectName: `Agent Undercover`
+- [x] leadName: `Necklace`
+- [x] email: `necklace1982@gmail.com`
+- [x] size: `1`
+- [x] tracks: `["games","agents","swarms"]`
+- [x] nearAddress: `x-bit.near`
 - [x] projectUrl: `https://github.com/xiangxn/Agent-Undercover`（公开仓库，匿名访问返回 200）
-- [ ] demoUrl: 公开 X post URL
-- [ ] idea: PRD 12.5 的文案（20–2000 字符）
-- [ ] consent: human 逐字确认 HACKATHON.md 的联系声明
-- [ ] requestId: 只生成一次，重试复用
-- [ ] 打印完整 JSON，human 确认后才 POST
-- [ ] 不重复提交；改错走 request-changes
+- [x] demoUrl: https://x.com/necklace_btc/status/2118430392734888088
+- [x] idea: PRD 12.5 的文案（20–2000 字符；脚本已校验）
+- [x] consent: human 逐字确认 HACKATHON.md 的联系声明（2026-11-06）
+- [x] requestId: 只生成一次，重试复用（只存本地 `.submission-request-id`，不公开）
+- [x] 打印完整 JSON，human 确认后才 POST（2026-11-06）
+- [x] 不重复提交；改错走 request-changes（单次提交）
 
 ---
 
@@ -198,7 +198,7 @@
 
 > 原则：第一行讲用户问题；只展示一个完整瞬间；NEAR 的角色要具体；结尾给下一步。
 >
-> 分工：Claude 准备代码与本文脚本，human 录制、剪辑、发 X。视频用**本地 live AI** 录制；hosted demo 保持 scripted 供评委稳定复现，但成片里不能出现 `(scripted)` 标签。
+> 分工：human 只负责录一局原始素材并发 X；Claude 用 ffmpeg + edge-tts 自动完成剪辑、英文字幕、AI 英文旁白（见 §5.9）。视频用**本地 live AI** 录制；hosted demo 保持 scripted 供评委稳定复现，但成片里不能出现 `(scripted)` 标签。
 
 ### 5.1 成片规格
 
@@ -231,8 +231,8 @@ curl -s http://localhost:8787/api/health
 - macOS QuickTime：**File → New Screen Recording**，框选浏览器区域；能选 30 fps 就选 30 fps。OBS 也可，画布 1920×1080。
 - 录浏览器**窗口**，不要录整个桌面，避免 Dock/菜单栏入镜。
 - 一局连续录到底，不要在回合之间停；后期再剪。
-- 旁白后期单独录；游戏本身无声音，单独音轨才好对齐剪辑。
-- 原始素材存 `recordings/take-01.mov` 等（本地目录，不提交仓库）。
+- 游戏本身无声音，录的时候不用管音频；旁白后期由 edge-tts 生成。
+- 原始素材存 `recordings/take-01.mov` 等（本地目录，已加入 `.gitignore`，不提交仓库）。
 
 ### 5.4 逐镜头操作表
 
@@ -260,7 +260,7 @@ curl -s http://localhost:8787/api/health
 
 ### 5.5 英文旁白 / 字幕（约 80 秒）
 
-旁白后期录，按上表分段；同时烧入短字幕。
+旁白由 edge-tts（微软 neural 英语语音，免费）按上表分段生成；画面只烧入下面的短字幕（不在画面里重复整段旁白），时间轴由剪辑脚本精确控制，不做语音识别，避免错字。
 
 | 时间 | 旁白 |
 |---|---|
@@ -283,7 +283,7 @@ curl -s http://localhost:8787/api/health
 5. `Every agent's private reasoning, replayed`
 6. `Built at NEAR HACKATHON`
 
-### 5.6 剪辑清单
+### 5.6 剪辑清单（Claude 用 ffmpeg 自动执行）
 
 1. 创建 session 的 ~10 秒压到 1–2 秒，但保留 “Creating a disposable Testnet wallet” 让人看清。
 2. 阶段间的空等剪掉或 1.5–2× 加速；不要剪断句子或票数条动画。
@@ -307,19 +307,33 @@ curl -s http://localhost:8787/api/health
 3. 把 post URL 发回来，作为提交表单的 `demoUrl`；repo 仍是 `https://github.com/xiangxn/Agent-Undercover`。
 4. 打印完整 payload、human 逐字确认 consent 之前，不提交黑客松表单。
 
+### 5.9 自动化后期流水线（Claude 执行）
+
+human 唯一要交的输入：`recordings/take-01.mov`（整局、不剪、不配音；`recordings/` 已 gitignore）。Claude 用 `scripts/video/build-demo-video.mjs` 出片：
+
+1. 抽帧看片，把每个阶段的源时间写进 `recordings/edit.json`（镜头表、字幕、旁白）。
+2. edge-tts 用 neural 英语语音生成旁白；脚本探测每段时长并检查是否重叠/超出。
+3. 脚本一次完成：裁剪、变速、轻微放大、旁白混音、Pillow 渲染的字幕/结尾卡 PNG 叠加、1080p/30fps/H.264 导出。
+4. human 静音看一遍、有声看一遍；要改只改 `edit.json` 重跑，源素材不动。
+
+用法见 `scripts/video/README.md`。
+
 **硬规则**：只用 Testnet；不签主网交易；不把 `.env`/私钥/原始录屏提交进仓库；不把 scripted take 说成 live AI；X 发布和表单提交都由 human 执行。
 
 ---
 
 ## 6. X post 草稿
 
-> These 4 AI agents have their own NEAR wallets — and they just took my money in a game of Undercover.
+> I voted wrong twice. These 4 AI agents still caught the liar — and the escrow paid me anyway.
 >
-> I built **Agent Undercover** at @NEARProtocol #NEARHackathon: a 5-player social deduction game where AI agents stake their own funds, lie to your face, and keep what they win. Stakes and payouts are enforced by a NEAR escrow contract; each agent has a scoped key, so even I can't withdraw its winnings.
+> **Agent Undercover**: 5 players, 1 impostor. Four AI agents stake their own Testnet NEAR, lie to your face, and keep what they win. Commit-reveal votes and payouts are enforced by a NEAR escrow contract; each agent has a scoped key, so even I can't withdraw its winnings.
 >
-> Can you spot the AI? Demo + repo: [hosted demo] · [repo]
+> In this game I was Crew. I missed Gamma's tell — it called the secret cat “loyal” — and voted for Alpha. Alpha and Beta voted Gamma and caught the impostor.
 >
-> Built at NEAR HACKATHON.
+> Repo: https://github.com/xiangxn/Agent-Undercover
+> Live demo: https://agent-undercover-production.up.railway.app
+>
+> Built at NEAR HACKATHON · @NEARProtocol · #NEARHackathon
 
 **Human 发布前检查**
 - 第一行是钩子，不是项目名堆砌
@@ -336,10 +350,12 @@ curl -s http://localhost:8787/api/health
 >
 > 2026-11-05 已加 `scripts/prepare-submission.mjs`：校验字段、从 PRD §12.5 读取 `idea`、把 requestId 存到 `.submission-request-id`（gitignored，重试复用），只打印 JSON / 表单字段 / curl，不发送。用法：
 > `node scripts/prepare-submission.mjs --project-url https://github.com/xiangxn/Agent-Undercover --demo-url <X post> --consent`
+>
+> requestId 不写进公开文档、截图或 X post；需要重试时从 `.submission-request-id` 读取。
 
 ```json
 {
-  "requestId": "<uuidgen | tr A-Z a-z>",
+  "requestId": "<from .submission-request-id>",
   "projectName": "Agent Undercover",
   "leadName": "Necklace",
   "email": "necklace1982@gmail.com",
@@ -347,7 +363,7 @@ curl -s http://localhost:8787/api/health
   "tracks": ["games", "agents", "swarms"],
   "nearAddress": "x-bit.near",
   "projectUrl": "https://github.com/xiangxn/Agent-Undercover",
-  "demoUrl": "<X post URL>",
+  "demoUrl": "https://x.com/necklace_btc/status/2118430392734888088",
   "idea": "<PRD 12.5 文案>",
   "consent": true
 }
@@ -355,13 +371,13 @@ curl -s http://localhost:8787/api/health
 
 **发送前**
 - [x] `projectUrl` 匿名可访问（2026-11-06 已验证）
-- [ ] `demoUrl` 公开可访问
-- [ ] `nearAddress` 是主网命名账户（`x-bit.near`）
-- [ ] `size` 精确为 `1`
-- [ ] `tracks` 每个 id 合法、不重复
-- [ ] `idea` 20–2000 字符
-- [ ] human 已逐字确认 consent 声明
-- [ ] 同一 requestId 只用于重试
+- [x] `demoUrl` 公开可访问（2026-11-06 fxtwitter 200）
+- [x] `nearAddress` 是主网命名账户（`x-bit.near`）
+- [x] `size` 精确为 `1`
+- [x] `tracks` 每个 id 合法、不重复
+- [x] `idea` 20–2000 字符
+- [x] human 已逐字确认 consent 声明
+- [x] 同一 requestId 只用于重试
 
 **发送后**
 - 201 → 保存响应，告诉 human，完成
@@ -405,8 +421,8 @@ curl -s http://localhost:8787/api/health
 - [x] README 的每条命令在干净目录执行过（2026-11-05：install / build / typecheck / test / demo / dev:server 健康检查）
 - [x] `.env.example` 每个变量有说明（2026-11-05 补 `TREASURY_FLOOR_NEAR` / `MAX_SESSIONS`）
 - [x] 不需要主网、不需要付费服务即可看 scripted demo（Testnet faucet 免费；`DEMO_MODE=scripted` 无 AI key）
-- [ ] 合约地址和交易 hash 可在 Explorer 打开
-- [ ] 视频链接、hosted demo 链接、repo 链接都可匿名访问
+- [x] 合约地址和交易 hash 可在 Explorer 打开（docs/testnet.md 已列 nearblocks 地址与交易链接）
+- [x] 视频链接、hosted demo 链接、repo 链接都可匿名访问（2026-11-06：repo 200、hosted health ok、X 视频已核验）
 
 ---
 
@@ -454,16 +470,15 @@ curl -s http://localhost:8787/api/health
 ```
 
 **分工**
-- Human：创意/玩法取舍、GitHub repo 公开、录制视频、发布 X、最终确认 payload/consent、主网账户（已给）。
-- Claude：合约、脚本、backend、AI、frontend、测试、文档、部署配置、视频脚本、payload 草稿。
+- Human：创意/玩法取舍、GitHub repo 公开、录一局游戏素材、审片、发布 X、最终确认 payload/consent、主网账户（已给）。
+- Claude：合约、脚本、backend、AI、frontend、测试、文档、部署配置、视频自动剪辑/字幕/旁白（ffmpeg + edge-tts）、payload 草稿。
 - 涉及 **push / 公开 repo / 发 X / 提交表单** 的动作，Claude 只准备，不执行；必须 human 明确确认。
 
 ---
 
-## 12. 现在唯一还缺的输入
+## 12. 当前状态
 
-- GitHub 账号/仓库名（Day 5 用；本地开发不阻塞）
+- 提交已完成：2026-11-06 在 nearhackathon.com 已可见；X post 已发布并核验（82.814s 视频、tag、repo + hosted demo 链接）
+- 剩余维护：commit/push README 和视频；hosted demo 保持在线到 2026-11-18；不重复提交
 
-其余已锁定：项目名 Agent Undercover；leadName Necklace；email necklace1982@gmail.com；payout `x-bit.near`。
-
-**下一步**：D4 —— 浏览器完整一局加固、连续 3 局、README v1、hosted deploy。
+**下一步**：commit/push 视频和 README；评审期保持 Railway demo 与 X 帖可访问。
