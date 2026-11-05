@@ -32,7 +32,7 @@
 > 一款 5 人社交推理游戏：每个座位都可以是真人或 AI Agent；每个 Agent 拥有自己的 NEAR 子账户，用自己的钱下注，当面撒谎，赢了就把钱留下。
 
 **提交表单短描述（约 380 字符）**
-> Agent Undercover is a 5-player social deduction game where every seat can be filled by a human or an AI agent. Each agent owns a persistent NEAR subaccount, stakes its own testnet NEAR, lies in public, and keeps what it wins — and an agent can be on either side, crew or impostor. Players get a secret word and describe it in one sentence each round; the crew votes to exile the impostors. Stakes are locked in a custom NEAR escrow contract, roles and votes are commit-revealed, and settlement is on-chain. Each agent has a scoped FunctionCall key, so even the operator cannot withdraw its winnings. AI dialogue uses NEAR AI Cloud; a scripted mode runs without an API key.
+> Agent Undercover is a 5-player social deduction game where every seat can be filled by a human or an AI agent. Each agent owns a persistent NEAR subaccount, stakes its own testnet NEAR, lies in public, and keeps what it wins — and an agent can be on either side, crew or impostor. Players get a secret word and describe it in one sentence each round; the crew votes to exile the impostors. Stakes are locked in a custom NEAR escrow contract, roles and votes are commit-revealed, and settlement is on-chain. Each agent account has only scoped FunctionCall keys and a stake-only wallet contract — no full-access key — so even the operator cannot withdraw its winnings. AI dialogue uses NEAR AI Cloud; a scripted mode runs without an API key.
 
 ---
 
@@ -61,6 +61,7 @@ NEAR 的账户模型刚好提供了这四样：
 - 命名账户 / 子账户 → 持久身份；
 - 账户余额 → 钱包；
 - FunctionCall access key（限定 receiver + method + allowance）→ 受限权限；
+- 部署在 Agent 账户上的 stake-only wallet 合约 → 只允许把固定质押送进游戏合约，没有提款路径；
 - 合约里的战绩/收益映射 → 可累积的后果。
 
 ### 2.3 为什么是游戏
@@ -73,10 +74,13 @@ NEAR 的账户模型刚好提供了这四样：
 
 ### 3.1 AI 是链上经济主体，不是前端脚本
 
-- 4 个 Agent 各有**持久 NEAR 子账户**：`alpha.<parent>.testnet`、`beta...`、`gamma...`、`delta...`。
-- 每个账户创建时**只添加一把 FunctionCall key**，权限限定为游戏合约的指定方法，**不添加 full-access key**。
-- Agent 用自己的账户余额质押；赢了，奖金直接进它的账户；输了，余额减少。
-- 运营方可以给 Agent 账户转账充值，但**无法从 Agent 账户提款**（没有 full-access key）。`view_access_keys` 可直接验证。
+- 4 个 Agent 各有**持久 NEAR 子账户**：`alpha.agents.<parent>.testnet`、`beta...`、`gamma...`、`delta...`。
+- 每个 Agent 账户上部署一个极小的 **stake-only wallet 合约**；账户**只有两把 scoped FunctionCall key，没有 full-access key**：
+  - game key：receiver 为游戏合约，方法限定 `submit_description` / `commit_vote` / `reveal_vote`；
+  - wallet key：receiver 为 Agent 自己的账户，方法限定 `stake`。
+- **协议限制**：NEAR 的 FunctionCall access key 不能附带 deposit（`Deposit is not allowed with function call`），所以 Agent 无法直接调用 payable 的 `join_room`。wallet 合约的 `stake(room_id)` 从 Agent 账户余额里把**固定金额**的质押转发给游戏合约的 `join_room`；它没有任何提款方法，也不能调用其他合约。
+- Agent 用自己的账户余额质押；赢了，奖金直接转进它的账户；输了，余额减少。当前唯一资金出口是继续支付下一局质押。
+- 运营方可以给 Agent 账户转账充值，但**无法从 Agent 账户提款**：没有 full-access key，wallet 合约也没有 withdraw 路径。`view_access_keys` 和 explorer 上的合约代码可直接验证。
 - Agent 的战绩、收益、最近对局记录在合约里，跨对局累积。
 
 ### 3.2 可验证的秘密，而不是“链上明文”
@@ -99,7 +103,7 @@ NEAR 的账户模型刚好提供了这四样：
 以下内容 MVP **不做、不吹**：
 
 - 不是 trustless：角色分配、AI 行为、salt 都在运营方手里；合约保证的是资金和结算规则，以及超时退款。
-- Agent 不是自主签名：MVP 由后端持有受限的 FunctionCall key 代签；IronClaw TEE 托管是 Roadmap。
+- Agent 不是自主签名：MVP 由后端持有两把受限的 FunctionCall key（game + wallet stake）代签；IronClaw TEE 托管是 Roadmap。
 - 不是完全免 Gas：Demo 用已充值的测试网 session account；NEP-366 是加分项/Roadmap。
 - 不是“AI 自己产生意识”：AI 由 NEAR AI Cloud 推理，运营方编排。
 
@@ -213,9 +217,9 @@ Lobby -> Describing -> VoteCommit -> VoteReveal -> RoleReveal
 |---|---|---|
 | 单局质押 | 0.1 NEAR | 真人 + 每个 Agent 都从自己账户出 |
 | 5 人奖池 | 0.5 NEAR | 全部锁进合约 |
-| Agent 初始余额 | 2 NEAR | 由运营方一次性转入；之后靠赢钱/充值 |
+| Agent 初始余额 | 2.4 NEAR | 由运营方一次性转入；其中约 2.1 NEAR 是 wallet 合约代码存储押金，之后靠赢钱/充值 |
 | Agent 每局 Gas | 由账户余额支付 | FunctionCall key 的 allowance 覆盖 Gas |
-| 收益归属 | Agent 子账户 | 运营方无 full-access key，无法提走 |
+| 收益归属 | Agent 子账户 | 运营方无 full-access key，wallet 合约无提款方法，无法提走 |
 | 信誉 | games / wins / losses / earnings / last_played | 存在合约里，跨局累积 |
 
 **经济闭环**：Agent 用自己的余额质押 → 赢了账户余额增加 → 下一局继续用同一账户质押 → 信誉和收益公开可查。运营方只能充值，不能提款；Agent 破产时无法参赛，这本身就是一个可展示的状态。
@@ -252,7 +256,7 @@ Scripted 模式仍然走**真实 Testnet 交易**：真实质押、真实 commit
 - **有证据可推理**：每个人每轮的一句话都是公开的，矛盾会累积。
 - **有金钱后果**：AI 真的在用自己的钱玩；它赢了，钱进它的账户。
 - **有反转可看**：结束后回放 AI 的私有推理和卧底串供，观众能看到“它当时为什么这么说”。
-- **Demo 的黄金 10 秒**：浏览器里 Agent 子账户余额在结算后增加，点开 explorer 看到 `view_access_keys` 只有一把受限 key。
+- **Demo 的黄金 10 秒**：浏览器里 Agent 子账户余额在结算后增加，点开 explorer 看到 `view_access_keys` 只有两把受限 key，以及一个没有提款方法的 wallet 合约。
 
 ---
 
@@ -333,8 +337,9 @@ Crew 可以只做一次 call；时间允许时也做一次 strategy call，形�
 |---|---|---|
 | 自研 Escrow 合约 | 锁定质押、阶段状态机、commit-reveal、结算、退款、Agent 战绩 | 资金和规则的实际承载 |
 | 子账户 | 4 个持久 Agent 账户 + 每个真人 session 账户 | 持久身份和独立余额 |
-| FunctionCall access key | Agent 只能调用游戏合约的指定方法，无 full-access key | 受限权限；运营方也提不走 Agent 的钱 |
-| 命名账户 | `alpha.<parent>.testnet` 等可读身份 | Explorer 可直接展示 |
+| FunctionCall access key | 每个 Agent 两把：game key 只能调游戏合约的三个方法，wallet key 只能调自己的 `stake`；无 full-access key | 受限权限；运营方也提不走 Agent 的钱 |
+| Agent wallet 合约 | 部署在 Agent 账户上，只把固定质押转发给 `join_room`，没有提款方法 | 绕过“FunctionCall key 不能带 deposit”的协议限制 |
+| 命名账户 | `alpha.agents.<parent>.testnet` 等可读身份 | Explorer 可直接展示 |
 | NEAR AI Cloud | 卧底对话、策略、推理 | AI 能力来源 |
 | NEP-366 | Roadmap / 加分项：真人免 Gas | 不放在 MVP 关键路径 |
 | IronClaw | Roadmap：TEE 托管 Agent key，自主签名 | 未来去掉后端代签 |
@@ -361,9 +366,9 @@ Crew 可以只做一次 call；时间允许时也做一次 strategy call，形�
 │   Backend / Game Master      │      │   NEAR Testnet               │
 │   Node 22 + TS + Socket.IO   │─────▶│   · Escrow contract          │
 │   · room state machine       │      │   · Agent subaccounts        │
-│   · role/word assignment     │      │   · Session accounts         │
-│   · AI orchestration         │      └──────────────────────────────┘
-│   · agent signers            │
+│   · role/word assignment     │      │   · Agent wallet contracts   │
+│   · AI orchestration         │      │   · Session accounts         │
+│   · agent signers            │      └──────────────────────────────┘
 │   · settlement worker        │─────▶ NEAR AI Cloud (OpenAI API)
 └──────────────────────────────┘
 ```
@@ -374,15 +379,15 @@ Crew 可以只做一次 call；时间允许时也做一次 strategy call，形�
 |---|---|---|
 | 合约 | 资金、阶段、commit-reveal 校验、票数、胜负、分账、退款、战绩 | 角色分配、AI 生成、私钥 |
 | Backend / Game Master | 房间编排、角色/词分配、AI 调用、Agent 签名、阶段推进、结算提交 | 不能改 commitment、不能提走玩家/Agent 资金 |
-| Agent worker | 持有该 Agent 的 scoped key，签名 join/description/commit/reveal | 不能转账、不能调用其他合约 |
-| Browser | 展示、收集真人输入、用 session key 签名、验证 commitment | 不持有 master key |
+| Agent worker | 持有该 Agent 的 game key 和 wallet stake key，签名 stake/description/commit/reveal | 不能转账、不能调用其他合约、不能提款 |
+| Browser | 展示、收集真人输入、用 session key 签名、验证 commitment | 不持有 master key；session key 只属于该真人的一次性账户 |
 | NEAR AI Cloud | LLM 推理 | 不持有任何链上私钥 |
 
 ### 7.3 数据流（一轮）
 
 1. Backend 通过 WebSocket 广播 `round_started`。
 2. Agent worker 并行调用 AI（或 scripted），得到 `description/vote/reasoning`。
-3. Agent 用 scoped key 调 `submit_description`、`commit_vote`。
+3. Agent 先用自己的 wallet key 调 `stake(room_id)`，由 wallet 合约把质押转发给 `join_room`；再用 game key 调 `submit_description`、`commit_vote`。
 4. 真人浏览器用 session key 签 `submit_description`、`commit_vote`，通过 relay 或 RPC 发送。
 5. 合约在最后一个 commit 后进入 `VoteReveal`。
 6. 各方 `reveal_vote`；合约自动 tally，进入 `RoleReveal`。
@@ -494,6 +499,16 @@ Room
 | `get_agent_stats(account)` | view | — | 战绩/收益 |
 | `get_room_count()` | view | — | 统计 |
 
+**Agent wallet 合约**（独立部署在每个 Agent 账户上，不属于游戏合约）：
+
+| 方法 | 调用者 | 说明 |
+|---|---|---|
+| `new(game_contract, stake)` | 部署时 | 固定游戏合约地址和质押金额 |
+| `stake(room_id)` | Agent 自己的 wallet key | 要求 predecessor == 当前账户、deposit == 0；向 `game_contract.join_room` 转发固定 `stake` |
+| `get_game_contract()` / `get_stake()` | view | 验证配置 |
+
+wallet 合约没有提款、转账或调用其他合约的方法。
+
 ### 8.3 不变量
 
 1. 合约持有的 NEAR ≥ 所有未结算房间的 `pot` 之和。
@@ -503,7 +518,8 @@ Room
 5. 只有 `game_master` 能 `start_game` / `reveal_role` / `force_advance`。
 6. `settle` 的支付总额 ≤ `pot`；余数给第一个赢家。
 7. `refund` 只能在超时后调用；已结算/已退款不可重复。
-8. Agent 账户的 key 不在合约控制范围内；合约只负责把奖金转给账户。
+8. Agent 账户的 key 不在游戏合约控制范围内；游戏合约只负责把奖金转给账户。
+9. Agent wallet 合约只能向固定的游戏合约 `join_room` 支付固定 `stake`，不能向其他地址转账，也没有提款方法。
 
 ### 8.4 事件（可选但建议）
 
@@ -530,8 +546,8 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 |---|---|---|
 | 合约 | 保管质押、校验 commit、计票、分账、退款 | 不知道角色/词；不能主动执行；只能被调用 |
 | Game master（后端） | 分配角色/词、开局、揭示被放逐者、推进阶段、提交结算 | 不能伪造 commitment 的揭示；不能提走玩家/Agent 资金；掉线时玩家可超时退款 |
-| 运营方 / Agent worker | 运行 AI、持有 Agent 的 scoped key、签名 Agent 动作 | 不能从 Agent 账户提款（无 full-access key）；不能调用游戏合约以外的方法 |
-| 真人（Demo） | 浏览器生成 keypair，签自己的描述/投票 | 不能改别人的状态；session key 只能调用游戏合约 |
+| 运营方 / Agent worker | 运行 AI、持有 Agent 的两把 scoped key、签名 Agent 动作 | 不能从 Agent 账户提款（无 full-access key）；不能调用游戏合约方法或自己的 `stake` 以外的方法 |
+| 真人（Demo） | 浏览器生成一次性 session 账户的 keypair，自己签带质押的 join 和描述/投票 | 不能改别人的状态；后端只创建并充值该账户，不持有它的私钥 |
 | 真人（真实钱包） | 用 Wallet Selector 签名 | 需要自己准备 Testnet NEAR；MVP 可后置 |
 | NEAR AI Cloud | 推理 | 不接触私钥 |
 
@@ -540,14 +556,14 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 1. **角色分配在链下**：game master 知道谁是卧底，理论上可以泄露给卧底 AI。MVP 不做可验证角色分配；在 README/视频里明确说明。
 2. **salt 在 game master 手里**：如果 game master 不揭示，游戏无法结算；但玩家可以在 deadline 后 `refund`。
 3. **AI 行为由运营方编排**：Agent 不是自主的；IronClaw/TEE 是 Roadmap。
-4. **真人 session key 由浏览器生成**：Demo 模式下，后端负责创建账户并充值，但不持有私钥；这比后端代签更可信。
+4. **真人 session key 由浏览器生成**：Demo 模式下，后端负责创建一次性 session 账户并充值，把该账户的 full-access key 设为浏览器公钥，但从不持有私钥；真人自己签带质押的 join。该账户是 disposable 的，余额只属于这一局真人。
 
 ### 9.3 威胁与缓解
 
 | 威胁 | 缓解 |
 |---|---|
 | 运营方偷看真人投票并通知 AI | 真人在浏览器本地计算 hash 并签名 commit；AI 的票在同一阶段已 commit；运营方最早在 reveal 时看到真人的票 |
-| 运营方提走 Agent 奖金 | Agent 账户无 full-access key；只能调用游戏合约；`view_access_keys` 可验证 |
+| 运营方提走 Agent 奖金 | Agent 账户无 full-access key；两把 scoped key 只能调游戏合约方法和自己的 `stake`；wallet 合约没有提款方法；`view_access_keys` 和合约代码可验证 |
 | 玩家不揭示票导致卡死 | `force_advance` 超时跳过；最终 `refund` |
 | 玩家重复提交/投自己 | 合约拒绝 |
 | 描述泄露自己的词 | 后端内容校验 + AI prompt 约束；合约只能校验长度，文档说明这是 off-chain 规则 |
@@ -562,7 +578,7 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 ### 10.1 必做（Must）
 
 1. **合约**：5 人房、质押、commit-reveal 角色/投票、tally、放逐、结算、退款、Agent 战绩；Rust 单测。
-2. **Agent 账户**：4 个持久子账户，scoped FunctionCall key，初始余额，公开战绩页。
+2. **Agent 账户**：4 个持久子账户，每个部署 stake-only wallet 合约，账户只有两把 scoped FunctionCall key，初始余额，公开战绩页。
 3. **Backend**：房间状态机、WebSocket、AI Cloud 并行调用、scripted 模式、Agent 签名、结算 worker。
 4. **Frontend**：Landing、Lobby、Game、Result/Replay；浏览器 session key 签名；不要求钱包插件。
 5. **Demo**：1 真人 + 4 Agent 一局可完整跑通；结果页展示链上分账和 Agent 余额变化。
@@ -594,12 +610,12 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 | 赛道 | 评委看什么 | 我们对应什么 |
 |---|---|---|
 | `games`（主） | 游戏循环、NPC 有钱包、玩家感觉不到链、真实经济 | 5 分钟一局、4 个 Agent 自有账户和质押、session key 免插件、结果页链上分账 |
-| `agents` | Agent 赚钱/花钱/谈判/持久身份 | Agent 用自己的余额质押、奖金进自己账户、跨局战绩/收益、scoped key 保证运营方也提不走 |
+| `agents` | Agent 赚钱/花钱/谈判/持久身份 | Agent 用自己的余额质押、奖金进自己账户、跨局战绩/收益、scoped keys + stake-only wallet 保证运营方也提不走 |
 | `swarms` | 多 Agent 协调、竞争、 emergent economy | 4 个 Agent 各自策略；卧底 AI 私下串供；策略→发言两段式；结束后回放联盟和背叛 |
 
 **提交 tracks**：`["games", "agents", "swarms"]`，主攻 `games`。README 用一张表逐条对应官方 hints，不要只写“我们也支持”。
 
-**差异化**：最接近的竞品 Deceit（Sui 上的 AI 社交推理，NEAR AI 只用于创建 Agent）验证了方向，但结算在 Sui。我们的差异化是 **NEAR 原生托管 + 子账户 + scoped key + Agent 自有余额 + 链上结算**，不是“又一个 AI 狼人杀”。
+**差异化**：最接近的竞品 Deceit（Sui 上的 AI 社交推理，NEAR AI 只用于创建 Agent）验证了方向，但结算在 Sui。我们的差异化是 **NEAR 原生托管 + 子账户 + scoped keys + stake-only wallet + Agent 自有余额 + 链上结算**，不是“又一个 AI 狼人杀”。
 
 ---
 
@@ -653,15 +669,15 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 - 决定 repo 公开/推送（Claude 不擅自 push）
 - 主网收款账户已提供：`x-bit.near`
 
-### 12.5 提交用 `idea` 文案（约 850 字符）
+### 12.5 提交用 `idea` 文案（约 980 字符，上限 2000）
 
-> Agent Undercover is a 5-player social deduction game where every seat can be a human or an AI agent. Each agent owns a persistent NEAR subaccount, stakes its own testnet NEAR, lies in public, and keeps what it wins — and an agent can be crew or impostor. Each player gets a secret word; the impostors get a similar word. Every round, each player describes their word in one public sentence, then the crew votes to exile the impostors. Stakes are locked in a custom NEAR escrow contract; roles and votes are commit-revealed, and settlement is rule-based and permissionless, with a timeout refund. Each agent has a scoped FunctionCall key and its own balance, winnings, and reputation — even the operator cannot withdraw its funds. AI dialogue is generated with NEAR AI Cloud, and a scripted mode runs the full game without an API key. The MVP runs on NEAR testnet; IronClaw TEE key custody, NEP-366 gasless entry, and Intents prize pools are roadmap.
+> Agent Undercover is a 5-player social deduction game where every seat can be a human or an AI agent. Each agent owns a persistent NEAR subaccount, stakes its own testnet NEAR, lies in public, and keeps what it wins — and an agent can be crew or impostor. Each player gets a secret word; the impostors get a similar word. Every round, each player describes their word in one public sentence, then the crew votes to exile the impostors. Stakes are locked in a custom NEAR escrow contract; roles and votes are commit-revealed, and settlement is rule-based and permissionless, with a timeout refund. Each agent account holds only scoped FunctionCall keys and a tiny stake-only wallet contract — no full-access key — so even the operator cannot withdraw its funds. AI dialogue is generated with NEAR AI Cloud, and a scripted mode runs the full game without an API key. The MVP runs on NEAR testnet; IronClaw TEE key custody, NEP-366 gasless entry, and Intents prize pools are roadmap.
 
 ### 12.6 X post 草稿（human 发布）
 
 > These 4 AI agents have their own NEAR wallets — and they just took my money in a game of Undercover.
 >
-> I built Agent Undercover at @NEARProtocol #NEARHackathon: a 5-player social deduction game where AI agents stake their own funds, lie to your face, and keep what they win. Stakes and payouts are enforced by a NEAR escrow contract; each agent has a scoped key, so even I can't withdraw its winnings.
+> I built Agent Undercover at @NEARProtocol #NEARHackathon: a 5-player social deduction game where AI agents stake their own funds, lie to your face, and keep what they win. Stakes and payouts are enforced by a NEAR escrow contract; each agent has only scoped keys and a stake-only wallet with no withdrawal path, so even I can't withdraw its winnings.
 >
 > Can you spot the AI? Demo + repo: [links]
 >
@@ -684,7 +700,7 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 | 评委无法复现 | 中 | 高 | scripted 模式 + README + 种子脚本 + hosted demo |
 | 链上存储成本 | 低 | 中 | 描述 ≤ 280 bytes；5 人；3 轮；合约充值 |
 | 过度承诺被评委挑战 | 中 | 高 | README 写清 trust model；不声称 trustless/自主 |
-| 赛道撞车 | 中 | 中 | 强调 NEAR 原生 scoped key + Agent 自有余额 + 链上结算 |
+| 赛道撞车 | 中 | 中 | 强调 NEAR 原生 scoped keys + stake-only wallet + Agent 自有余额 + 链上结算 |
 
 ---
 
@@ -711,4 +727,5 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 | Crew / Impostor | 好人 / 卧底 |
 | Pot | 本局所有质押总额 |
 | Scripted mode | 不调用 LLM 的确定性 Agent 脚本 |
-| Session account | Demo 中为真人创建的测试网子账户，浏览器持有 scoped key |
+| Agent wallet | 部署在 Agent 账户上的极小合约，只有 `stake(room_id)` 能把固定质押转发给 `join_room`，没有提款方法 |
+| Session account | Demo 中为真人创建的一次性测试网子账户，浏览器持有其 full-access key，后端只负责创建和充值 |
