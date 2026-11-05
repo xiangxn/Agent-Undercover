@@ -116,7 +116,7 @@
 - [x] 连续跑 3 局无手动干预；无 console error（2026-11-05 run 17/18/19 同一 server 进程，全部 Crew 胜、7 张推理卡、exit 0；期间 RPC 408 均由链上恢复）
 - [x] 重启 server 后回归：run 20（2026-11-05，Crew 胜，human 卧底，7 张推理卡，0 console error；commit 超时 2 次、reveal 超时 1 次，重试后均恢复）
 - [x] README v1（run steps、架构、trust model、track mapping；2026-11-05 已改为当前真实流程）
-- [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞（2026-11-05 已备好 `render.yaml` 与 `RENDER_EXTERNAL_URL` 同源配置；等推送与 Render 账号）
+- [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞（2026-11-05 Render 新账号点 New 即要求绑卡，已改备 Railway：`railway.json` + `.nvmrc`，并加 `Dockerfile`；同源 origin 支持 `RAILWAY_PUBLIC_DOMAIN`；步骤见 `docs/deploy.md`）
 - [x] 部署预算保护：treasury/master 余额下限、`MAX_SESSIONS` 上限；server typecheck 通过
 - [ ] **23:59 UTC 功能冻结**
 - [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；当前工作树 scripted demo 复跑 exit 0；2026-11-05 fresh clone 全流程验证通过

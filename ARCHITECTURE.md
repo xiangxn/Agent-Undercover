@@ -83,10 +83,11 @@ The MVP is **not trustless**:
 ## Deployment
 
 - Contract: NEAR Testnet.
-- App: one Node service (Render; `render.yaml`). Express serves the API, the
-  Socket.IO endpoint, the RPC relay, and the built web app from `web/dist`, so
-  there is no cross-origin setup. Render sets `RENDER_EXTERNAL_URL`, which the
-  server uses as the Socket.IO origin.
+- App: one Node service (Railway `railway.json`, Render `render.yaml`, or any
+  Docker host via `Dockerfile`). Express serves the API, the Socket.IO endpoint,
+  the RPC relay, and the built web app from `web/dist`, so there is no
+  cross-origin setup. The server uses `RAILWAY_PUBLIC_DOMAIN` or
+  `RENDER_EXTERNAL_URL` as the Socket.IO origin when set.
 - Web static hosting on Vercel is optional; it needs `WEB_ORIGIN` and the API
   relay pointed at the backend.
 - AI: NEAR AI Cloud; scripted mode requires no API key.

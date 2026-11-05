@@ -16,9 +16,13 @@ function required(name: string): string {
 export const config = {
   root: ROOT,
   port: Number(env.PORT ?? 8787),
-  // Render exposes the service URL; the server also serves the built web app,
+  // Hosts expose the service URL; the server also serves the built web app,
   // so same-origin Socket.IO works without configuring WEB_ORIGIN.
-  webOrigin: env.WEB_ORIGIN ?? env.RENDER_EXTERNAL_URL ?? "http://localhost:5173",
+  webOrigin:
+    env.WEB_ORIGIN ??
+    env.RENDER_EXTERNAL_URL ??
+    (env.RAILWAY_PUBLIC_DOMAIN ? `https://${env.RAILWAY_PUBLIC_DOMAIN}` : undefined) ??
+    "http://localhost:5173",
   rpcUrl: env.NEAR_RPC_URL ?? "https://test.rpc.fastnear.com",
   contractId: required("CONTRACT_ACCOUNT_ID"),
   masterAccountId: required("MASTER_ACCOUNT_ID"),

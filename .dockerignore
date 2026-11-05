@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+.keys
+runs
+db.md
+.submission-request-id
+
+node_modules
+**/node_modules
+web/dist
+contract/target
+**/target
+
+.DS_Store
+*.log

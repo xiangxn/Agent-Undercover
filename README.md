@@ -88,11 +88,11 @@ pnpm deploy:contract      # deploy and initialize the game contract
 
 The scripts write `.keys/accounts.json` (gitignored, mode 600); copy those values into `.env`.
 
-### Deploy the hosted demo (Render)
+### Deploy the hosted demo
 
-[render.yaml](render.yaml) defines one Node service that serves the API, Socket.IO, and the built web app. Connect the repo in Render, apply the Blueprint, and enter the private keys it prompts for (the values from `.env`). Public account IDs are already in the blueprint.
+One Node service serves the API, Socket.IO, and the built web app. [railway.json](railway.json) and [render.yaml](render.yaml) describe the same service for Railway and Render; [docs/deploy.md](docs/deploy.md) lists the variables, secrets, and steps for both, plus a plain Docker command. Public account IDs go in the host's variables; private keys go in its secret manager (never in the repo).
 
-The server uses Render's `RENDER_EXTERNAL_URL` for same-origin Socket.IO, so no URL configuration is needed. The free plan sleeps after inactivity, and in-memory games do not survive a restart. New sessions are refused when the treasury drops below `TREASURY_FLOOR_NEAR` (default 0.5 NEAR); top up the treasury before sharing the link.
+The server derives its public origin from `RAILWAY_PUBLIC_DOMAIN` or `RENDER_EXTERNAL_URL`, so same-origin Socket.IO needs no URL configuration. Free plans sleep after inactivity, and in-memory games do not survive a restart. New sessions are refused when the treasury drops below `TREASURY_FLOOR_NEAR` (default 0.5 NEAR); top up the treasury before sharing the link.
 
 ### Modes
 
