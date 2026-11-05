@@ -28,6 +28,8 @@ AGENT_DELTA_ACCOUNT_ID=delta.agents.agent-undercover.testnet
 
 SESSION_FUNDING_NEAR=0.25
 TREASURY_FLOOR_NEAR=0.5
+MASTER_MIN_BALANCE_NEAR=0.5
+MASTER_TOPUP_NEAR=2
 MAX_SESSIONS=100
 ```
 
@@ -121,5 +123,8 @@ Testnet account from a browser form; enter the treasury account there.
 - Free services sleep after inactivity; the first request after sleep is slow.
 - In-memory games do not survive a restart or redeploy.
 - New sessions are refused below `TREASURY_FLOOR_NEAR`.
+- The master also pays contract storage for `start_game`/`advance` (about 0.1
+  NEAR per game). When it drops below `MASTER_MIN_BALANCE_NEAR`, the server
+  moves `MASTER_TOPUP_NEAR` from the treasury into it automatically.
 - The dashboard is the only place for keys. Do not put them in build variables
   or commit them.
