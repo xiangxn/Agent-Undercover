@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 near-sdk = "5.30.0"
+borsh = "1.8"
 hex = "0.4"
 
 [dev-dependencies]
