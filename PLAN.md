@@ -110,12 +110,12 @@
 - [x] 错误文案：`timed out` 正确归入 RPC 超时提示；描述/投票的恢复轮询延长到 25s
 - [x] 刷新恢复：Vote commit 阶段刷新页面，`game:watch` 重连并恢复状态（2026-11-05 run 15 完整结算）
 - [x] RPC 中继：上游 408/5xx 转成 JSON-RPC error（HTTP 200），避免浏览器 console error；45s 安全超时；FastNear 约 30s 的 408 仍会落链，提前 abort 会取消广播
-- [ ] 错误态、重连、超时、空房间、计时器（重连/计时器/刷新恢复已过；空房间未压测）
-- [ ] 连续跑 3 局无手动干预；无 console error（1/3：run 13 Crew 胜、7 张推理卡、无 console error）
-- [ ] README v1（run steps、架构、trust model、track mapping）
+- [ ] 错误态、重连、超时、空房间、计时器（重连/计时器/刷新恢复已过；空房间与容量上限未压测）
+- [x] 连续跑 3 局无手动干预；无 console error（2026-11-05 run 17/18/19 同一 server 进程，全部 Crew 胜、7 张推理卡、exit 0；期间 RPC 408 均由链上恢复）
+- [x] README v1（run steps、架构、trust model、track mapping；2026-11-05 已改为当前真实流程）
 - [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞
 - [ ] **23:59 UTC 功能冻结**
-- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；fresh clone 的 scripted demo 待最终验证
+- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；fresh clone 的 scripted demo 待最终验证
 
 ### Day 5 · 11-09
 
