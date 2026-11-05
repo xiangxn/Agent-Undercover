@@ -1137,6 +1137,129 @@ mod tests {
         contract.start_game("room-1".into(), commitments, vec![]);
     }
 
+
+    #[test]
+    #[should_panic(expected = "Vote already committed")]
+    fn duplicate_vote_commit_panics() {
+        let mut contract = new_contract();
+        let players = create_and_fill(&mut contract);
+        start(&mut contract, &players);
+        describe_all(&mut contract, &players);
+
+        let hash = hash_commitment("host.testnet", "salt-one");
+        testing_env!(ctx("p1.testnet", 0, 1_030));
+        contract.commit_vote("room-1".into(), hash.clone());
+        testing_env!(ctx("p1.testnet", 0, 1_031));
+        contract.commit_vote("room-1".into(), hash);
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot vote for yourself")]
+    fn self_vote_reveal_panics() {
+        let mut contract = new_contract();
+        let players = create_and_fill(&mut contract);
+        start(&mut contract, &players);
+        describe_all(&mut contract, &players);
+
+        for (index, player) in players.iter().enumerate() {
+            let target = if player == &account("p1.testnet") {
+                account("p1.testnet")
+            } else {
+                account("host.testnet")
+            };
+            testing_env!(ctx(player.as_str(), 0, 1_030 + index as u64));
+            contract.commit_vote(
+                "room-1".into(),
+                hash_commitment(target.as_str(), &format!("vote-{player}")),
+            );
+        }
+
+        testing_env!(ctx("p1.testnet", 0, 1_040));
+        contract.reveal_vote(
+            "room-1".into(),
+            account("p1.testnet"),
+            "vote-p1.testnet".into(),
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Deadline has not passed")]
+    fn refund_before_deadline_panics() {
+        let mut contract = new_contract();
+        testing_env!(ctx("host.testnet", STAKE, 1_001));
+        contract.create_room("room-1".into(), U128(STAKE), 2, 1, 3);
+
+        testing_env!(ctx("host.testnet", 0, 1_002));
+        contract.refund("room-1".into());
+    }
+
+    #[test]
+    fn impostor_wins_at_round_limit() {
+        let mut contract = new_contract();
+        testing_env!(ctx("host.testnet", STAKE, 1_001));
+        contract.create_room("room-1".into(), U128(STAKE), 5, 1, 1);
+        for (index, player) in ["p1.testnet", "p2.testnet", "p3.testnet", "p4.testnet"]
+            .iter()
+            .enumerate()
+        {
+            testing_env!(ctx(player, STAKE, 1_002 + index as u64));
+            contract.join_room("room-1".into());
+        }
+
+        let players: Vec<AccountId> = std::iter::once(account("host.testnet"))
+            .chain(
+                ["p1.testnet", "p2.testnet", "p3.testnet", "p4.testnet"]
+                    .iter()
+                    .map(|p| account(p)),
+            )
+            .collect();
+        start(&mut contract, &players);
+        describe_all(&mut contract, &players);
+
+        let crew_target = account("p1.testnet");
+        for (index, player) in players.iter().enumerate() {
+            let target = if player == &crew_target {
+                account("host.testnet")
+            } else {
+                crew_target.clone()
+            };
+            testing_env!(ctx(player.as_str(), 0, 1_030 + index as u64));
+            contract.commit_vote(
+                "room-1".into(),
+                hash_commitment(target.as_str(), &format!("vote-{player}")),
+            );
+        }
+        for (index, player) in players.iter().enumerate() {
+            let target = if player == &crew_target {
+                account("host.testnet")
+            } else {
+                crew_target.clone()
+            };
+            testing_env!(ctx(player.as_str(), 0, 1_040 + index as u64));
+            contract.reveal_vote(
+                "room-1".into(),
+                target,
+                format!("vote-{player}"),
+            );
+        }
+
+        let room = contract.get_room("room-1".into());
+        assert_eq!(room.pending_exile, Some(crew_target.clone()));
+        testing_env!(ctx("gm.testnet", 0, 1_050));
+        contract.reveal_role(
+            "room-1".into(),
+            crew_target,
+            Role::Crew,
+            "salt-p1.testnet".into(),
+        );
+        testing_env!(ctx("p2.testnet", 0, 1_051));
+        contract.advance("room-1".into());
+
+        let room = contract.get_room("room-1".into());
+        assert_eq!(room.phase, Phase::Finished);
+        assert_eq!(room.winning_side, Some(Side::Impostors));
+    }
+
     #[test]
     fn lobby_refund_after_deadline() {
         let mut contract = new_contract();
