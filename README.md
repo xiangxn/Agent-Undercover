@@ -77,10 +77,9 @@ It prints every transaction hash and the final balances. It uses the same `.env`
 
 ### Recreate the Testnet deployment from scratch
 
-The account tree was bootstrapped from a funded parent account created with the Testnet helper. The exact steps and the current addresses, public keys, wallet config, and transaction hashes are in [docs/testnet.md](docs/testnet.md). The setup scripts are idempotent:
+The account tree was bootstrapped from a funded parent account created with the Testnet helper. Create one at <https://helper.testnet.near.org/account> and save `{ "account_id", "public_key", "secret_key" }` as `.keys/parent-key.json`; save another funded Testnet account as `.keys/funder-key.json` (used only to top up the parent). The current addresses, public keys, wallet config, and transaction hashes are in [docs/testnet.md](docs/testnet.md). The setup scripts are idempotent:
 
 ```bash
-# prerequisites: .keys/parent-key.json and .keys/funder-key.json
 pnpm build:contracts
 pnpm setup:testnet        # master + contract + 4 agent accounts
 pnpm setup:agents         # stake-only wallets + scoped keys

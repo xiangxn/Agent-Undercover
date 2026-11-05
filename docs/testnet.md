@@ -6,15 +6,17 @@ All accounts are on NEAR Testnet. No mainnet deployment, no mainnet transactions
 
 | Role | Account ID | Public key | Balance |
 |---|---|---|---|
-| Game master / parent | `agent-undercover.testnet` | `ed25519:368GhkimEswFPCuYPAFoJH4ftPGDq7JGo4NP3HDD15Ld` | ~0.79 NEAR |
-| Contract | `game.agent-undercover.testnet` | `ed25519:2gEJdcU5mVyRKeQbqjRz8hVAXzM3uo2FwAtyr6PSvLXZ` | ~3.96 NEAR |
+| Game master / parent | `agent-undercover.testnet` | `ed25519:368GhkimEswFPCuYPAFoJH4ftPGDq7JGo4NP3HDD15Ld` | ~0.42 NEAR |
+| Contract | `game.agent-undercover.testnet` | `ed25519:2gEJdcU5mVyRKeQbqjRz8hVAXzM3uo2FwAtyr6PSvLXZ` | ~1.85 NEAR available (~8.39 total) |
 | Agent namespace | `agents.agent-undercover.testnet` | `ed25519:FEF9HZCGpRPu4pufafaSRgodCFQ89yXK6MCzRyZd5PLB` | ~0.17 NEAR |
-| Agent Alpha | `alpha.agents.agent-undercover.testnet` | game `ed25519:5zewwWQLb6mtir2ytHrX4R5u8MKtZd9s5ryxDJThZQgK` · wallet `ed25519:D9cQQ7aJUuRMA27FFuLWoHmjcUn2qYVw7EQcY9Dj2EpP` | ~0.29 NEAR |
-| Agent Beta | `beta.agents.agent-undercover.testnet` | game `ed25519:2RN1DToirpNACiqWG75ucQsGZ5a3Pbp3MfxKKsJxnxn4` · wallet `ed25519:Cse5jSF6ufeDs3V6gv2HF4YngtPm4ocMVe6gwgAs2A4D` | ~0.29 NEAR |
-| Agent Gamma | `gamma.agents.agent-undercover.testnet` | game `ed25519:3zoLEm3wo8mrwcYP5NVW2NJsri815VD5EnbbesC99rGE` · wallet `ed25519:9FQsA4fAzsKF5MujYprPmNdsK6vpF5ZVXo9hupdQf7cj` | ~0.29 NEAR |
-| Agent Delta | `delta.agents.agent-undercover.testnet` | game `ed25519:CBCymHZjzZPcmK6h8cbgqH55isjtJdtD1mUBbkkHohtt` · wallet `ed25519:5U3koWogp2ugJcGYPhLHtUTheJq3sNJikvECEBtxX3VT` | ~0.29 NEAR |
+| Agent Alpha | `alpha.agents.agent-undercover.testnet` | game `ed25519:5zewwWQLb6mtir2ytHrX4R5u8MKtZd9s5ryxDJThZQgK` · wallet `ed25519:D9cQQ7aJUuRMA27FFuLWoHmjcUn2qYVw7EQcY9Dj2EpP` | ~0.37 NEAR |
+| Agent Beta | `beta.agents.agent-undercover.testnet` | game `ed25519:2RN1DToirpNACiqWG75ucQsGZ5a3Pbp3MfxKKsJxnxn4` · wallet `ed25519:Cse5jSF6ufeDs3V6gv2HF4YngtPm4ocMVe6gwgAs2A4D` | ~0.41 NEAR |
+| Agent Gamma | `gamma.agents.agent-undercover.testnet` | game `ed25519:3zoLEm3wo8mrwcYP5NVW2NJsri815VD5EnbbesC99rGE` · wallet `ed25519:9FQsA4fAzsKF5MujYprPmNdsK6vpF5ZVXo9hupdQf7cj` | ~0.63 NEAR |
+| Agent Delta | `delta.agents.agent-undercover.testnet` | game `ed25519:CBCymHZjzZPcmK6h8cbgqH55isjtJdtD1mUBbkkHohtt` · wallet `ed25519:5U3koWogp2ugJcGYPhLHtUTheJq3sNJikvECEBtxX3VT` | ~0.77 NEAR |
 | Funder (testnet only) | `au-funder.testnet` | `ed25519:AJ3N16Gmk2NaqzQwAApr4zwHpiEVfMygoWaZksQXT3j9` | ~0.15 NEAR |
-| Operator treasury (testnet only) | `au-treasury.testnet` | `ed25519:2TL5WgRfFDMaAtmyy59Xnpn6gSiRenvBHnwV9APM3pSD` | ~2.00 NEAR |
+| Operator treasury (testnet only) | `au-treasury.testnet` | `ed25519:2TL5WgRfFDMaAtmyy59Xnpn6gSiRenvBHnwV9APM3pSD` | ~2.65 NEAR |
+
+Balances are **available** balances at 2026-11-05 and move with every game; check Explorer for current values. Agent totals are higher because each wallet contract's code stakes about 2 NEAR of storage.
 
 Explorer: <https://testnet.nearblocks.io/address/game.agent-undercover.testnet>
 

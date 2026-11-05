@@ -114,6 +114,7 @@
 - [x] RPC 中继：上游 408/5xx 转成 JSON-RPC error（HTTP 200），避免浏览器 console error；45s 安全超时；FastNear 约 30s 的 408 仍会落链，提前 abort 会取消广播
 - [ ] 错误态、重连、超时、空房间、计时器（重连/计时器/刷新恢复已过；空房间与容量上限未压测）
 - [x] 连续跑 3 局无手动干预；无 console error（2026-11-05 run 17/18/19 同一 server 进程，全部 Crew 胜、7 张推理卡、exit 0；期间 RPC 408 均由链上恢复）
+- [x] 重启 server 后回归：run 20（2026-11-05，Crew 胜，human 卧底，7 张推理卡，0 console error；commit 超时 2 次、reveal 超时 1 次，重试后均恢复）
 - [x] README v1（run steps、架构、trust model、track mapping；2026-11-05 已改为当前真实流程）
 - [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞（2026-11-05 已备好 `render.yaml` 与 `RENDER_EXTERNAL_URL` 同源配置；等推送与 Render 账号）
 - [x] 部署预算保护：treasury/master 余额下限、`MAX_SESSIONS` 上限；server typecheck 通过
@@ -293,7 +294,7 @@
 - [ ] `DEMO_MODE=live`：真实 AI 完整一局
 - [x] 浏览器：1 真人 + 4 Agent 完整一局（2026-11-05）
 - [x] 无 key → fallback 到 scripted（2026-11-05 `DEMO_MODE=live` 验证）
-- [ ] 真实 AI 超时/断网 → fallback（待 `NEAR_AI_API_KEY`）
+- [x] AI 请求失败 → fallback 到 scripted（2026-11-05 用不可达 endpoint 验证）；真实 AI 成功路径待 `NEAR_AI_API_KEY`
 - [x] 刷新页面 → 重连并恢复状态（2026-11-05）
 - [x] 新 clone → 按 README 跑通 scripted（2026-11-05 `/tmp/au-fresh`：install、web build、server typecheck、9 个合约测试、scripted 局 all exit 0）
 
