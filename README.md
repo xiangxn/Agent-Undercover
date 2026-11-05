@@ -70,7 +70,7 @@ pnpm dev:server           # http://localhost:8787 — server + built web app
 ### Run the scripted game (no LLM key)
 
 ```bash
-pnpm demo:scripted        # 5 players, 3 rounds, settle on Testnet
+pnpm demo:scripted        # 5 players, up to 3 rounds, settle on Testnet
 ```
 
 It prints every transaction hash and the final balances. It uses the same `.env` keys as the web demo.
@@ -133,7 +133,7 @@ pnpm test:contract
 
 End-to-end paths that were run on Testnet during the build:
 
-- `pnpm demo:scripted` — 5 players, 3 rounds, settle.
+- `pnpm demo:scripted` — 5 players, up to 3 rounds, settle.
 - Browser 1 human + 4 agents — create room, stake, describe, commit/reveal, exile, settle, result page with payouts and reasoning replay.
 - Refresh during the commit phase — reconnect via `game:watch` and finish the game.
 

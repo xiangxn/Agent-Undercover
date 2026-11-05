@@ -14,7 +14,7 @@
 - [ ] 公开 GitHub repo，含 MIT LICENSE，README 可让陌生人从零跑起来
 - [ ] 合约部署在 NEAR Testnet，地址写进 README
 - [ ] 4 个 Agent 持久子账户，`view_access_keys` 显示只有 scoped FunctionCall key，无 full-access key
-- [ ] `pnpm demo:scripted` 不需要 AI API key，能在 Testnet 跑完一局 5 人局并结算
+- [x] `pnpm demo:scripted` 不需要 AI API key，能在 Testnet 跑完一局 5 人局并结算（2026-11-05 复跑 exit 0：Crew 胜，4 winners，5 条描述 / 5 个 reveal）
 - [ ] `DEMO_MODE=live` 用 NEAR AI Cloud 跑完一局，AI 输出可读、可回放
 - [ ] 浏览器里 1 真人 + 4 Agent 完整玩一局：质押 → 描述 → commit-reveal 投票 → 放逐 → 结算
 - [ ] 结果页展示：胜方、分账、Agent 余额变化、Explorer 链接、AI 私有推理回放
@@ -81,7 +81,7 @@
 
 - [x] 合约：create/join/start、description、commit/reveal、tally、reveal_role、advance、settle、refund、views
 - [x] 单测：完整 5 人局、平票、错误哈希、重复提交、投自己、超时退款、分账余数
-- [x] `scripts/demo-scripted.mjs`：建房间 → 4 Agent join → start → 3 轮 → settle
+- [x] `scripts/demo-scripted.mjs`：建房间 → 4 Agent join → start → 最多 3 轮 → settle
 - [x] 打印交易 hash、Explorer 链接、最终余额、Agent stats
 - [x] Backend skeleton：Express + Socket.IO + 合约客户端 + Agent signer
 - [x] 验收：一局完整跑通；`Settled`；Agent 余额变化与分账一致；M1 成立
@@ -98,7 +98,9 @@
 - [x] 输出校验：长度、不含自己的词、投票合法；失败 fallback
 - [x] `runs/<room>.jsonl` 记录 reasoning
 - [x] Frontend v1：Landing/Lobby/Game/Result + Socket.IO + session key
-- [ ] 验收：浏览器能加入并看到状态；`DEMO_MODE=live` 跑完一局；无 key 自动 fallback（scripted 已跑通，live 待 NEAR_AI_API_KEY）
+- [x] 验收：浏览器能加入并看到状态（2026-11-05 多次完整对局）
+- [x] 无 key 自动 fallback（2026-11-05 `DEMO_MODE=live` + 空 `NEAR_AI_API_KEY`，`decideTurn` 返回 `source=scripted`）
+- [ ] `DEMO_MODE=live` + `NEAR_AI_API_KEY` 跑完一局（待 human 提供 key）
 
 ### Day 4 · 11-08
 
@@ -113,9 +115,10 @@
 - [ ] 错误态、重连、超时、空房间、计时器（重连/计时器/刷新恢复已过；空房间与容量上限未压测）
 - [x] 连续跑 3 局无手动干预；无 console error（2026-11-05 run 17/18/19 同一 server 进程，全部 Crew 胜、7 张推理卡、exit 0；期间 RPC 408 均由链上恢复）
 - [x] README v1（run steps、架构、trust model、track mapping；2026-11-05 已改为当前真实流程）
-- [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞
+- [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞（2026-11-05 已备好 `render.yaml` 与 `RENDER_EXTERNAL_URL` 同源配置；等推送与 Render 账号）
+- [x] 部署预算保护：treasury/master 余额下限、`MAX_SESSIONS` 上限；server typecheck 通过
 - [ ] **23:59 UTC 功能冻结**
-- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；fresh clone 的 scripted demo 待最终验证
+- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；当前工作树 scripted demo 复跑 exit 0；fresh clone 待最终验证
 
 ### Day 5 · 11-09
 
