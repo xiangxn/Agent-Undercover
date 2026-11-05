@@ -8,7 +8,7 @@
 
 In online social deduction games, "AI players" are usually scripts: they have no wallet, no assets, and no consequences. They can lie for free.
 
-Agent Undercover makes the AI players real economic actors. Each agent has a persistent NEAR subaccount, stakes its own testnet NEAR, and keeps its winnings. The escrow contract enforces the pot and the payouts. A scoped FunctionCall key lets an agent play the game but never withdraw its funds — not even the operator can.
+Agent Undercover makes the AI players real economic actors. Each agent has a persistent NEAR subaccount, stakes its own testnet NEAR, and keeps its winnings. The escrow contract enforces the pot and the payouts. Scoped FunctionCall keys and a stake-only wallet contract let an agent play the game but never withdraw its funds — not even the operator can.
 
 ## How the game works
 
@@ -24,8 +24,9 @@ Full rules: [RULES.md](RULES.md). Architecture and trust model: [ARCHITECTURE.md
 ## How NEAR is used
 
 - **Custom escrow contract** (`near-sdk-rs`, testnet): stakes, phases, commit-reveal checks, tally, payouts, refunds, agent reputation.
-- **Persistent subaccounts**: `alpha.<parent>.testnet`, `beta...`, `gamma...`, `delta...`.
-- **Scoped FunctionCall access keys**: each agent can only call the game contract; no full-access key exists.
+- **Persistent subaccounts**: `alpha.agents.<parent>.testnet`, `beta...`, `gamma...`, `delta...`.
+- **Scoped FunctionCall access keys**: each agent has a game key (describe/commit/reveal) and a wallet key (stake only); no full-access key exists.
+- **Stake-only agent wallet**: a tiny contract that forwards the fixed stake to `join_room`, because a FunctionCall key cannot attach a deposit. It has no withdrawal method.
 - **NEAR AI Cloud**: OpenAI-compatible inference for agent dialogue and strategy.
 - **NEP-366 / IronClaw / Intents**: roadmap, not MVP dependencies.
 
@@ -39,7 +40,7 @@ rustup target add wasm32-unknown-unknown
 
 pnpm install
 cp .env.example .env      # fill in testnet keys
-pnpm build:contract
+pnpm build:contracts
 pnpm test:contract
 
 # once deployed:
@@ -50,12 +51,12 @@ pnpm dev                  # backend + web
 Testnet contract: [`game.agent-undercover.testnet`](https://testnet.nearblocks.io/address/game.agent-undercover.testnet) — game master `agent-undercover.testnet`. Deployment details: [docs/testnet.md](docs/testnet.md).
 
 Agent accounts:
-- `alpha.agent-undercover.testnet`
-- `beta.agent-undercover.testnet`
-- `gamma.agent-undercover.testnet`
-- `delta.agent-undercover.testnet`
+- `alpha.agents.agent-undercover.testnet`
+- `beta.agents.agent-undercover.testnet`
+- `gamma.agents.agent-undercover.testnet`
+- `delta.agents.agent-undercover.testnet`
 
-Each one has a single scoped FunctionCall key and no full-access key.
+Each one has a stake-only wallet contract, two scoped FunctionCall keys, and no full-access key.
 
 ## Trust model
 
@@ -65,7 +66,7 @@ This MVP is **not trustless**. The operator runs the game master and the agents:
 - Off-chain: role/word assignment, salts, AI prompts and behavior.
 - The contract verifies every reveal against an on-chain commitment and pays only according to the rules.
 - The game master can stall, but players can call `refund` after the game deadline.
-- Each agent has a scoped key and no full-access key; the operator can top up an agent but cannot withdraw its winnings.
+- Each agent has two scoped keys and no full-access key; its wallet contract has no withdrawal method, so the operator can top up an agent but cannot withdraw its winnings.
 - IronClaw TEE key custody is roadmap.
 
 ## Hackathon tracks

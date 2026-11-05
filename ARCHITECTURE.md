@@ -13,12 +13,12 @@ Backend / Game Master (Node 22 + TypeScript + Socket.IO)
   · room state machine
   · role/word assignment + salts
   · AI orchestration (NEAR AI Cloud)
-  · agent signers (scoped FunctionCall keys)
+  · agent signers (two scoped FunctionCall keys per agent)
   · settlement worker
         │
         ├──────────────▶ NEAR Testnet
         │                 · escrow contract
-        │                 · agent subaccounts
+        │                 · agent subaccounts + stake-only wallets
         │                 · session subaccounts
         │
         └──────────────▶ NEAR AI Cloud (OpenAI-compatible)
@@ -49,17 +49,18 @@ Any unsettled phase + deadline --------------------------------------> Refunded
 | Agent reputation | On-chain | games / wins / losses / earnings |
 | Role assignment, words, salts | Off-chain | Game master |
 | AI prompts / reasoning | Off-chain | Logged for post-game replay |
-| Agent keys | `.keys/` (gitignored) | Scoped FunctionCall keys |
+| Agent wallet contracts | On-chain | Fixed stake → `join_room`; no withdrawal method |
+| Agent keys | `.keys/` (gitignored) | Two scoped FunctionCall keys per agent |
 
 ## Key model
 
 - **Game master** (`MASTER_ACCOUNT_ID`): full-access key in `.env`; creates accounts, starts games, reveals the exiled role, force-advances, settles.
-- **Agents**: subaccounts created with only a FunctionCall key:
-  - `receiver_id`: the game contract
-  - `method_names`: join/describe/commit/reveal
-  - `allowance`: enough testnet NEAR for gas
-  - **no full-access key** — the operator cannot withdraw the agent's balance.
-- **Human demo player**: the browser generates a keypair; the backend creates a subaccount with a scoped FunctionCall key for that public key and funds it. The private key never leaves the browser.
+- **Agents**: subaccounts with a stake-only wallet contract and exactly two FunctionCall keys:
+  - game key: `receiver_id` = the game contract; `method_names` = `submit_description`, `commit_vote`, `reveal_vote`;
+  - wallet key: `receiver_id` = the agent's own account; `method_names` = `stake`;
+  - both keys have a gas allowance; **no full-access key**.
+- **Why a wallet contract**: a NEAR FunctionCall access key cannot attach a deposit, so the account cannot call the payable `join_room` directly. `stake(room_id)` on the wallet contract forwards exactly the configured stake to `join_room`; it has no withdrawal, transfer, or arbitrary-call method. Winnings are transferred to the agent account by settlement and can only be used for future stakes.
+- **Human demo player**: the browser generates a keypair; the backend creates a disposable subaccount, sets that public key as its full-access key, and funds it. The private key never leaves the browser; the backend holds no key for the session account.
 - **Real wallet players** (stretch): Wallet Selector on testnet.
 
 ## Commit-reveal
@@ -76,6 +77,7 @@ The MVP is **not trustless**:
 - The game master knows the roles and can, in principle, favor an agent.
 - The game master holds the salts; if it disappears, the game cannot settle, but players can refund after the deadline.
 - The contract still enforces the pot, the commit-reveal checks, the payout rule, and the timeout refund.
+- The operator holds both agent keys but cannot withdraw agent funds: the wallet contract has no withdrawal path, and the account has no full-access key.
 - IronClaw TEE key custody and verifiable role assignment are roadmap.
 
 ## Deployment

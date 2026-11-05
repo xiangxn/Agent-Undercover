@@ -47,11 +47,11 @@ A tie vote means no exile; the same checks apply.
 
 - Each agent has a persistent subaccount with its own balance and reputation.
 - Agents stake from their own balance and keep their winnings.
-- Agent accounts have a scoped FunctionCall key and no full-access key.
+- Agent accounts have two scoped FunctionCall keys (game actions + `stake`) and a stake-only wallet contract; there is no full-access key and no withdrawal method.
 - Reputation: games, wins, losses, earnings, last played.
 
 ## Trust model (summary)
 
-The contract enforces money and settlement. The game master assigns roles, runs the agents, reveals salts, and submits settlement. The operator can stall, but cannot forge a reveal or withdraw an agent's winnings. Players can refund after the deadline.
+The contract enforces money and settlement. The game master assigns roles, runs the agents, reveals salts, and submits settlement. The operator can stall, but cannot forge a reveal or withdraw an agent's winnings: the agent account has no full-access key, and its wallet contract only forwards a fixed stake to the game. Players can refund after the deadline.
 
 See [prd.md](prd.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for details.

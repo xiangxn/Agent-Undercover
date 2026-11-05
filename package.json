@@ -6,10 +6,13 @@
   "packageManager": "pnpm@10.33.2",
   "scripts": {
     "build:contract": "cd contract && cargo build --target wasm32-unknown-unknown --release",
+    "build:wallet": "cd contract/agent-wallet && cargo build --target wasm32-unknown-unknown --release",
+    "build:contracts": "pnpm build:contract && pnpm build:wallet",
     "test:contract": "cd contract && cargo test",
     "setup:testnet": "node scripts/setup-testnet.mjs",
+    "setup:agents": "node scripts/setup-agent-wallets.mjs",
     "deploy:contract": "node scripts/deploy-contract.mjs",
-    "demo:scripted": "pnpm --filter @agent-undercover/server demo:scripted",
+    "demo:scripted": "node --env-file=.env scripts/demo-scripted.mjs",
     "dev:server": "pnpm --filter @agent-undercover/server dev",
     "dev:web": "pnpm --filter @agent-undercover/web dev",
     "dev": "pnpm --parallel --filter @agent-undercover/server --filter @agent-undercover/web dev"
