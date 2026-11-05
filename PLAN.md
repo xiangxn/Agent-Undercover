@@ -194,25 +194,120 @@
 
 ---
 
-## 5. Demo 视频脚本（60–90 秒）
+## 5. Demo 视频录制脚本（60–90 秒）
 
 > 原则：第一行讲用户问题；只展示一个完整瞬间；NEAR 的角色要具体；结尾给下一步。
+>
+> 分工：Claude 准备代码与本文脚本，human 录制、剪辑、发 X。视频用**本地 live AI** 录制；hosted demo 保持 scripted 供评委稳定复现，但成片里不能出现 `(scripted)` 标签。
 
-| 时间 | 画面 | 旁白/字幕 |
+### 5.1 成片规格
+
+- 1920×1080，30 fps，H.264 MP4，60–90 秒，尽量 < 50 MB。
+- 英文字幕烧进画面（X 默认静音自动播放，静音也要能看懂）。
+- 不出现：私钥、`.env`、终端里的密钥、钱包插件、浏览器个人资料/邮箱、主网账户。只出现 Testnet。
+- 最佳剧情是**human 当卧底**：AI 在推理回放里点破你的含糊描述，这是全片最强 10 秒。若随机到好人，也照常录，用 AI 互指的推理卡代替；绝不伪造结果。
+
+### 5.2 录前检查（开录前 10 分钟）
+
+```bash
+cd /Users/necklace/work/near/hk
+
+# 重启 server，清掉遗留的内存局和计时器
+DEMO_MODE=live pnpm --filter @agent-undercover/server start
+
+# 另开终端确认
+curl -s http://localhost:8787/api/health
+# 期望：{"ok":true,"games":0}
+```
+
+- [ ] 落地页显示 **NEAR AI Cloud · live**，不是 “scripted fallback”；否则 key 或 `DEMO_MODE` 没生效，先修再录。
+- [ ] treasury > `TREASURY_FLOOR_NEAR`（0.5），master > 0.5。master 现在会自动从 treasury 补，但 treasury 干了就开不了新局；不足时按 `docs/deploy.md` 充值。
+- [ ] 用**新的无痕窗口**打开 `http://localhost:8787`；普通窗口可能从 `sessionStorage` 恢复旧局，必须从落地页开始。
+- [ ] Chrome 窗口 1920×1080、页面缩放 125%、隐藏书签栏、只留一个标签页；关掉 Slack、邮箱、含密钥的终端、任何显示姓名/邮箱的窗口。
+- [ ] 不开录制彩排一遍，确认流程和 AI 台词落点。每局成本约 0.25 NEAR（treasury）+ 几美分 AI 额度。
+
+### 5.3 录制设置
+
+- macOS QuickTime：**File → New Screen Recording**，框选浏览器区域；能选 30 fps 就选 30 fps。OBS 也可，画布 1920×1080。
+- 录浏览器**窗口**，不要录整个桌面，避免 Dock/菜单栏入镜。
+- 一局连续录到底，不要在回合之间停；后期再剪。
+- 旁白后期单独录；游戏本身无声音，单独音轨才好对齐剪辑。
+- 原始素材存 `recordings/take-01.mov` 等（本地目录，不提交仓库）。
+
+### 5.4 逐镜头操作表
+
+真实一局约 2 分钟，成片保留 ~75 秒；下表时间是**成片时间**，不是录制时间。
+
+| 成片时间 | 画面 | 操作 |
 |---|---|---|
-| 0–5s | 四个 Agent 头像 + 各自 NEAR 子账户余额 | “These four AI agents have their own NEAR wallets. I’m about to play Undercover against them — for real money.” |
-| 5–15s | 大厅：我质押 0.1 NEAR；4 个 Agent 从各自子账户 join；奖池 0.5 NEAR | “Five players. Four agents. One of them is lying. Every stake is locked in a NEAR escrow contract.” |
-| 15–30s | 第一轮：词卡（我的词 / 我的阵营）；4 条描述出现；卧底那句看似合理 | “Everyone describes their secret word in one sentence. The impostor has a similar word — and has to blend in.” |
-| 30–45s | 我投票；commit-reveal 状态；放逐结果：我投错了，一个好人 Agent 被放逐 | “I voted. Commit-reveal hides the votes until everyone has committed. I got it wrong.” |
-| 45–60s | 第二轮/结算：卧底存活 → 卧底胜；合约自动分账 | “The impostor survived. The contract pays the winning side — including the AI.” |
-| 60–75s | Explorer：卧底 Agent 子账户余额增加；`view_access_keys` 只有 FunctionCall key | “Its winnings go into its own subaccount. It only has a scoped key — even I can’t withdraw its money.” |
-| 75–90s | 结果页：AI 私有推理回放 / 卧底串供；结尾 repo + hosted demo | “After the game, you can see exactly how it lied. Built at NEAR HACKATHON. Can you spot the AI?” |
+| 0:00–0:06 | 落地页主标题 “Five players. One is lying.” | 无痕窗口打开落地页，标题停 2 秒。 |
+| 0:06–0:14 | 创建 session → 大厅 → 4 个 agent 加入 → 奖池 0.50 NEAR | 点 **Stake 0.1 NEAR · Play now**。让 “Creating a disposable Testnet wallet” 露一下，剪辑把 ~10 秒压到 ~2 秒。 |
+| 0:14–0:22 | 词卡翻开：CREW / IMPOSTOR + 秘密词 | 等翻牌动画结束，角色停 2 秒。若是卧底，旁白不要念出秘密词。 |
+| 0:22–0:36 | 第一轮：你的一句话 → 4 个 agent 气泡依次出现 | 输入并提交；等 4 条都出现，悬停或后期放大其中一条 AI 台词。 |
+| 0:36–0:46 | 投票 commit → reveal → 票数条 | 选一个怀疑对象，点 **Commit vote**；等所有人 reveal、票数条走完再切。 |
+| 0:46–0:52 | 裁决浮层：被放逐者 + 身份翻牌 | 在 “Beta is exiled / CREW / Wrong seat” 停 2 秒。 |
+| 0:52–1:02 | 第二轮或直接结算；结果标题 “IMPOSTOR CAUGHT / ESCAPED” | 若继续，第二轮只留一小段描述，结果一出现就切。 |
+| 1:02–1:14 | Private reasoning replay | 滚到 **Private reasoning replay**，停 2 张卡，优先选点破你“含糊描述”的那张；这是“AI 真在推理”的证据。 |
+| 1:14–1:20 | Payout + 结尾卡 | 露出分账行和一个 Explorer 链接，切静态结尾卡：repo、hosted demo、“Built at NEAR HACKATHON”。 |
 
-**录制建议**
-- 1080p，浏览器缩放 110–125%，字体大。
-- 提前跑一遍 scripted 模式确认流程；live AI 作主录制，scripted 作 fallback。
-- 视频里不要出现真实私钥、`.env`、主网账户。
-- 若一局太长，剪辑只保留关键描述和结算；不要伪造结果。
+操作注意：
+
+- human 是卧底时，用故意含糊的一句，例如 “It shows up in ordinary life in a way everyone has seen.”；AI 推理卡会点破它，这就是成片的高光。
+- human 是好人时，给一句具体但不直白的线索，让 AI 互相盘；推理回放仍然撑得住故事。
+- 画面有字时鼠标不要动；只在点击时移动。
+- 链上 feed 出现 “thinking (scripted)” 或罐头台词，说明该回合 fallback 了：剪掉或重录，不要当成 live 交付。
+- 录制中不要开钱包插件、区块浏览器新标签或终端；需要 Explorer 画面就后期贴静态截图。
+
+### 5.5 英文旁白 / 字幕（约 80 秒）
+
+旁白后期录，按上表分段；同时烧入短字幕。
+
+| 时间 | 旁白 |
+|---|---|
+| 0:00 | “These four AI agents have their own NEAR wallets — and one of them is about to lie to my face.” |
+| 0:08 | “This is Undercover: five players, one impostor. Every stake is locked in a NEAR escrow contract.” |
+| 0:15 | “Each agent owns a subaccount, stakes its own Testnet NEAR, and runs on NEAR AI Cloud.” |
+| 0:24 | “Everyone describes a secret word in one sentence. The impostor gets a similar word and has to blend in.” |
+| 0:37 | “Votes are commit-revealed, so nobody can copy a vote before committing.” |
+| 0:47 | “Wrong seat. The impostor is still in the room.” |
+| 0:55 | “The contract settles the pot automatically — the winning side takes it, agents included.” |
+| 1:03 | “After the game, every agent’s private reasoning is replayable. This is how it decided to lie.” |
+| 1:15 | “Agent Undercover. Built at NEAR HACKATHON. Repo and live demo in the post.” |
+
+烧入字幕（每段一句）：
+
+1. `5 players · 1 impostor · 0.5 NEAR pot`
+2. `Each agent stakes its own NEAR`
+3. `One sentence each — the impostor must blend in`
+4. `Commit-reveal votes, tallied on-chain`
+5. `Every agent's private reasoning, replayed`
+6. `Built at NEAR HACKATHON`
+
+### 5.6 剪辑清单
+
+1. 创建 session 的 ~10 秒压到 1–2 秒，但保留 “Creating a disposable Testnet wallet” 让人看清。
+2. 阶段间的空等剪掉或 1.5–2× 加速；不要剪断句子或票数条动画。
+3. 最多保留 3 条完整 AI 台词，其余半露即可；观众只需要一个“AI 在读空气”的瞬间。
+4. 词卡、票数条、点破你的推理卡各加 105–110% 轻微放大。
+5. 加字幕和旁白；加 BGM 时音量压在旁白之下。
+6. 结尾卡：`github.com/xiangxn/Agent-Undercover` + hosted demo URL + `Built at NEAR HACKATHON`，停 4 秒。
+7. 导出 1920×1080 H.264、30 fps；静音看一遍、有声看一遍，两个版本都要成立。
+
+### 5.7 重录与预算
+
+- 每条 take 新建一个 Testnet session：treasury 出 ~0.25 NEAR，master 付合约存储，AI 额度几美分。
+- 预算 3 条 take。每条前看落地页 live 标签和 server 日志；局没打完就重启 server 再录。
+- 该重录就重录：词卡错过、票数条没走完、出现 scripted fallback、通知挡住桌面。
+- 录视频不要跑 `pnpm demo:scripted`；scripted 只用于评委复现，不是成片。
+
+### 5.8 发布与交接
+
+1. human 上传视频到 X，按 §6 草稿发布；必须含 built at NEAR HACKATHON、@NEARProtocol、#NEARHackathon，并附视频。
+2. 用无痕窗口确认视频能播、repo 和 hosted 链接匿名可开。
+3. 把 post URL 发回来，作为提交表单的 `demoUrl`；repo 仍是 `https://github.com/xiangxn/Agent-Undercover`。
+4. 打印完整 payload、human 逐字确认 consent 之前，不提交黑客松表单。
+
+**硬规则**：只用 Testnet；不签主网交易；不把 `.env`/私钥/原始录屏提交进仓库；不把 scripted take 说成 live AI；X 发布和表单提交都由 human 执行。
 
 ---
 
