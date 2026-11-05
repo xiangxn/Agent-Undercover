@@ -59,7 +59,17 @@ async function main() {
     console.log(`[browser] landing loaded: ${cta.trim()}`);
     await page.screenshot({ path: "/tmp/au-landing.png", fullPage: true });
 
-    await clickButtonContaining(page, "Stake 0.1 NEAR");
+    // The CTA stays disabled until Socket.IO connects. Clicking too early is a
+    // no-op, which used to look like a hung game.
+    await page.waitForFunction(
+      () => {
+        const button = document.querySelector("button.btn-primary");
+        return Boolean(button && !button.disabled);
+      },
+      { timeout: 30_000 },
+    );
+    const clicked = await clickButtonContaining(page, "Stake 0.1 NEAR");
+    if (!clicked) throw new Error("Stake button was not clickable");
     console.log("[browser] started session; waiting for the table…");
 
     const deadline = Date.now() + 10 * 60 * 1000;
@@ -147,6 +157,10 @@ async function main() {
       }));
       console.log("[browser] saved state:", JSON.stringify(savedState));
       await page.screenshot({ path: "/tmp/au-timeout.png", fullPage: true });
+      if (consoleErrors.length > 0) {
+        console.log("[browser] console errors:");
+        for (const error of consoleErrors) console.log(`  ${error}`);
+      }
       throw new Error("Game did not settle within 10 minutes");
     }
 

@@ -13,6 +13,16 @@ function required(name: string): string {
   return value;
 }
 
+// A session pays the 0.1 stake and ~0.1 of room storage in create_room before
+// the engine can start. Funding less than this mints an account that cannot
+// open a room, so fail at boot instead of on the first player's click.
+const sessionFundingNear = env.SESSION_FUNDING_NEAR ?? "0.25";
+if (Number(sessionFundingNear) < 0.22) {
+  throw new Error(
+    "SESSION_FUNDING_NEAR must be at least 0.22 NEAR (stake + room storage + gas)",
+  );
+}
+
 export const config = {
   root: ROOT,
   port: Number(env.PORT ?? 8787),
@@ -29,7 +39,7 @@ export const config = {
   masterPrivateKey: required("MASTER_PRIVATE_KEY"),
   treasuryAccountId: required("TREASURY_ACCOUNT_ID"),
   treasuryPrivateKey: required("TREASURY_PRIVATE_KEY"),
-  sessionFundingNear: env.SESSION_FUNDING_NEAR ?? "0.25",
+  sessionFundingNear,
   sessionTopUpNear: env.SESSION_TOPUP_NEAR ?? "0.2",
   // Refuse new sessions below this treasury balance. The public demo cannot
   // drain a shared Testnet account faster than it can be topped up.

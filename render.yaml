@@ -32,10 +32,10 @@ services:
         value: gamma.agents.agent-undercover.testnet
       - key: AGENT_DELTA_ACCOUNT_ID
         value: delta.agents.agent-undercover.testnet
-      # 0.1 stake + gas; leaves room for ~14 hosted sessions from the current
-      # treasury while keeping the 0.5 NEAR floor.
+      # 0.1 stake + ~0.1 room storage + gas. 0.15 left the session unable to
+      # open a room ("not enough balance"); do not lower this below 0.22.
       - key: SESSION_FUNDING_NEAR
-        value: "0.15"
+        value: "0.25"
       - key: TREASURY_FLOOR_NEAR
         value: "0.5"
       - key: MAX_SESSIONS

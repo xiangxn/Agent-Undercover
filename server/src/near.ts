@@ -173,11 +173,13 @@ export async function createSessionAccount(publicKey: string): Promise<string> {
   return accountId;
 }
 
-/** Keep a disposable human session account able to pay the next stake. */
+/** Keep a disposable human session account able to pay gas for the rest of the game. */
 export async function ensureSessionFunded(accountId: string): Promise<void> {
   const available = await balanceYocto(accountId);
-  // stake + a few function calls
-  const needed = STAKE + nearToYocto("0.03");
+  // The human already paid the stake and room storage in create_room before the
+  // engine starts; topping up another stake here would only strand it in the
+  // disposable account.
+  const needed = nearToYocto("0.03");
   if (available >= needed) return;
   const amount = nearToYocto(config.sessionTopUpNear as `${number}`);
   await withTimeout(

@@ -26,7 +26,7 @@ AGENT_BETA_ACCOUNT_ID=beta.agents.agent-undercover.testnet
 AGENT_GAMMA_ACCOUNT_ID=gamma.agents.agent-undercover.testnet
 AGENT_DELTA_ACCOUNT_ID=delta.agents.agent-undercover.testnet
 
-SESSION_FUNDING_NEAR=0.15
+SESSION_FUNDING_NEAR=0.25
 TREASURY_FLOOR_NEAR=0.5
 MAX_SESSIONS=100
 ```
@@ -95,9 +95,12 @@ game state is in memory.
 
 ## Caveats
 
+- Each new game funds a disposable session with `SESSION_FUNDING_NEAR` (0.25):
+  the player stakes 0.1 and the contract locks roughly another 0.1 of room
+  storage. Budget about 0.25 NEAR per session and top up the treasury before
+  sharing a link.
 - Free services sleep after inactivity; the first request after sleep is slow.
 - In-memory games do not survive a restart or redeploy.
-- New sessions are refused below `TREASURY_FLOOR_NEAR`; top up the treasury
-  before sharing a link.
+- New sessions are refused below `TREASURY_FLOOR_NEAR`.
 - The dashboard is the only place for keys. Do not put them in build variables
   or commit them.
