@@ -55,7 +55,12 @@ export const config = {
   demoMode: (env.DEMO_MODE ?? "scripted") as "live" | "scripted",
   nearAiBaseUrl: env.NEAR_AI_BASE_URL ?? "https://cloud-api.near.ai/v1",
   nearAiApiKey: env.NEAR_AI_API_KEY ?? "",
-  nearAiModel: env.NEAR_AI_MODEL || "Qwen/Qwen3-30B-A3B-Instruct-2507",
+  nearAiModel: env.NEAR_AI_MODEL || "z-ai/glm-5.3-flash",
+  // Reasoning models spend the completion budget on hidden reasoning before
+  // they emit the JSON. GLM-5.3 Flash reasons by default (8192-token budget),
+  // so a 320-token answer came back empty. "low" keeps a turn around 2-3s;
+  // set NEAR_AI_REASONING_EFFORT empty for models that reject the parameter.
+  nearAiReasoningEffort: env.NEAR_AI_REASONING_EFFORT ?? "low",
   stakeYocto: env.AGENT_STAKE_YOCTO ?? "100000000000000000000000",
   maxRounds: 3,
   players: 5,

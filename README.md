@@ -97,7 +97,7 @@ The server derives its public origin from `RAILWAY_PUBLIC_DOMAIN` or `RENDER_EXT
 ### Modes
 
 - `DEMO_MODE=scripted` (default): deterministic agent lines; no AI API key. The full demo runs end-to-end.
-- `DEMO_MODE=live`: agents call NEAR AI Cloud (`NEAR_AI_API_KEY`, `NEAR_AI_MODEL`). If the key is missing or a call fails, agents fall back to scripted lines.
+- `DEMO_MODE=live`: agents call NEAR AI Cloud (`NEAR_AI_API_KEY`, `NEAR_AI_MODEL`, default `z-ai/glm-5.3-flash`). Reasoning models like GLM-5.3 Flash think before they answer, so `NEAR_AI_REASONING_EFFORT=low` keeps a turn around 2-3 seconds and leaves room for the JSON reply; leave it empty for a model that rejects the parameter. If the key is missing or a call fails twice, agents fall back to scripted lines.
 
 ### Reproducing a game without a wallet
 

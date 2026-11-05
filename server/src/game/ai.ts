@@ -107,6 +107,9 @@ async function callNearAi(input: TurnInput, correction?: string): Promise<string
         model: config.nearAiModel,
         temperature: 0.9,
         max_tokens: 320,
+        ...(config.nearAiReasoningEffort
+          ? { reasoning_effort: config.nearAiReasoningEffort }
+          : {}),
         messages: [
           { role: "system", content: systemPrompt(input) },
           {
