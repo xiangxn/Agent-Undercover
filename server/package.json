@@ -1,0 +1,11 @@
+{
+  "name": "@agent-undercover/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "demo:scripted": "tsx scripts/demo-scripted.ts"
+  }
+}

@@ -1,0 +1,25 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+.keys/
+*.pem
+*.key
+
+# Local game logs
+runs/
+
+# Rust
+target/
+contract/target/
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+*.log
+.pnpm-store/
+
+# OS
+.DS_Store
