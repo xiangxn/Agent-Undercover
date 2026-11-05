@@ -811,8 +811,10 @@ function GameScreen({
   const [selected, setSelected] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [verdict, setVerdict] = useState<RoundVerdict | null>(null);
+  const [roundBanner, setRoundBanner] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
   const lastVerdictRound = useRef(0);
+  const announcedRound = useRef(0);
   const me = snapshot.players.find((player) => player.account === account);
   const alivePlayers = snapshot.players.filter((player) => player.alive);
   const currentDescriptions = snapshot.descriptions.filter(
@@ -863,6 +865,20 @@ function GameScreen({
     return () => clearTimeout(timer);
   }, [verdict]);
 
+  // Announce each round once, as its description phase opens.
+  useEffect(() => {
+    if (snapshot.phase !== "describing") return;
+    if (announcedRound.current === snapshot.round) return;
+    announcedRound.current = snapshot.round;
+    setRoundBanner(snapshot.round);
+  }, [snapshot.phase, snapshot.round]);
+
+  useEffect(() => {
+    if (roundBanner === null) return;
+    const timer = setTimeout(() => setRoundBanner(null), 2400);
+    return () => clearTimeout(timer);
+  }, [roundBanner]);
+
   const submit = async () => {
     const text = draft.trim();
     if (!text) return;
@@ -879,6 +895,15 @@ function GameScreen({
 
   return (
     <main className="game-shell">
+      {roundBanner !== null && (
+        <div className="round-banner" key={roundBanner}>
+          <span>
+            ROUND {roundBanner}{" "}
+            <i>/ {snapshot.maxRounds}</i>
+          </span>
+          <small>one sentence each · everyone is watching</small>
+        </div>
+      )}
       <div className="game-top">
         <div className="round-block">
           <span className="muted tiny">ROUND</span>
@@ -894,7 +919,7 @@ function GameScreen({
           <span className="muted tiny">POT</span>
           <strong>{formatNear(snapshot.pot, 2)} NEAR</strong>
         </div>
-        <div className={`timer ${remaining < 15 ? "urgent" : ""}`}>
+        <div className={`timer ${remaining <= 10 ? "urgent" : ""}`}>
           <span className="tiny muted">PHASE ENDS</span>
           <strong>{formatCountdown(remaining)}</strong>
         </div>
