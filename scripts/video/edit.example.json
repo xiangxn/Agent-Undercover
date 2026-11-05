@@ -1,0 +1,43 @@
+{
+  "source": "recordings/take-01.mov",
+  "output": "recordings/agent-undercover-demo.mp4",
+  "voice": "en-US-AndrewNeural",
+  "voiceRate": "-4%",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "speed": 1,
+      "subtitle": "5 players · 1 impostor · 0.5 NEAR pot",
+      "narration": "These four AI agents have their own NEAR wallets — and one of them is about to lie to my face."
+    },
+    {
+      "start": 6.0,
+      "end": 16.0,
+      "speed": 1.5,
+      "zoom": 1.06,
+      "subtitle": "Each agent stakes its own NEAR",
+      "narration": "This is Undercover: five players, one impostor. Every stake is locked in a NEAR escrow contract.",
+      "narrationDelay": 0.2
+    },
+    {
+      "start": 22.0,
+      "end": 36.0,
+      "speed": 1,
+      "subtitle": "One sentence each — the impostor must blend in",
+      "narration": "Everyone describes a secret word in one sentence. The impostor gets a similar word and has to blend in."
+    }
+  ],
+  "endCard": {
+    "duration": 4,
+    "title": "Agent Undercover",
+    "subtitle": "Five players. One is lying.",
+    "lines": [
+      "github.com/xiangxn/Agent-Undercover",
+      "Built at NEAR HACKATHON"
+    ]
+  }
+}

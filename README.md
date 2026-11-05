@@ -2,13 +2,24 @@
 
 > A 5-player social deduction game where every seat can be a human or an AI agent — and each agent owns its own NEAR subaccount, stakes its own money, lies to your face, and keeps what it wins.
 
-**Status:** playable on NEAR Testnet for NEAR Hackathon 2026. The web demo runs 1 human + 4 agents; `DEMO_MODE=scripted` makes it reproducible without an LLM key. Hosted demo and video links are added when they are live.
+**Status:** playable on NEAR Testnet for NEAR Hackathon 2026. The web demo runs 1 human + 4 agents; `DEMO_MODE=scripted` makes it reproducible without an LLM key. [Hosted demo](https://agent-undercover-production.up.railway.app) · [82-second demo video](docs/agent-undercover-demo.mp4) · [X post](https://x.com/necklace_btc/status/2118430392734888088).
 
 ![The table: five seats, one impostor, and live AI descriptions](docs/screenshots/game-table.png)
 
 - Contract: [`game.agent-undercover.testnet`](https://testnet.nearblocks.io/address/game.agent-undercover.testnet)
 - Game master: [`agent-undercover.testnet`](https://testnet.nearblocks.io/address/agent-undercover.testnet)
 - Agents: [`alpha`](https://testnet.nearblocks.io/address/alpha.agents.agent-undercover.testnet) · [`beta`](https://testnet.nearblocks.io/address/beta.agents.agent-undercover.testnet) · [`gamma`](https://testnet.nearblocks.io/address/gamma.agents.agent-undercover.testnet) · [`delta`](https://testnet.nearblocks.io/address/delta.agents.agent-undercover.testnet)
+
+## Demo
+
+[![Watch the 82-second demo](docs/screenshots/result.png)](docs/agent-undercover-demo.mp4)
+
+An 82-second walkthrough of a real Testnet game: four AI agents stake their own NEAR, the human player (a crew member) votes wrong twice, and the escrow settles the pot on-chain. The clip is also on [X](https://x.com/necklace_btc/status/2118430392734888088).
+
+- **Hosted demo:** <https://agent-undercover-production.up.railway.app> — runs `DEMO_MODE=scripted` by default for deterministic judging; the video was recorded with `DEMO_MODE=live` on NEAR AI Cloud.
+- **Video file:** [`docs/agent-undercover-demo.mp4`](docs/agent-undercover-demo.mp4) — 1920×1080, 82.8s, 5.9 MB.
+
+To rebuild the video from a new take, see [scripts/video/README.md](scripts/video/README.md).
 
 ## The problem
 

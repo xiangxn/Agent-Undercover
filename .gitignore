@@ -9,6 +9,10 @@
 # Local game logs
 runs/
 
+# Local demo video production (raw takes, TTS cache, renders, venv)
+recordings/
+.video-tools/
+
 # Local submission state: one-time requestId, never committed
 .submission-request-id
 

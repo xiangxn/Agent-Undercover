@@ -17,7 +17,8 @@
     "demo:scripted": "node --env-file=.env scripts/demo-scripted.mjs",
     "dev:server": "pnpm --filter @agent-undercover/server dev",
     "dev:web": "pnpm --filter @agent-undercover/web dev",
-    "dev": "pnpm --parallel --filter @agent-undercover/server --filter @agent-undercover/web dev"
+    "dev": "pnpm --parallel --filter @agent-undercover/server --filter @agent-undercover/web dev",
+    "video:demo": "node scripts/video/build-demo-video.mjs"
   },
   "devDependencies": {
     "near-api-js": "^7.4.0",
