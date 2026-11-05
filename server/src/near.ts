@@ -129,6 +129,25 @@ export function randomSalt(): string {
   return randomUUID();
 }
 
+/** Refill the game-master from the treasury when contract storage has drained it. */
+export async function ensureMasterFunded(): Promise<void> {
+  const available = await balanceYocto(config.masterAccountId);
+  if (available >= nearToYocto(config.masterMinBalanceNear as `${number}`)) return;
+  const amount = nearToYocto(config.masterTopUpNear as `${number}`);
+  await withTimeout(
+    treasury.signAndSendTransaction({
+      receiverId: config.masterAccountId,
+      actions: [actions.transfer(amount)],
+      waitUntil: "EXECUTED_OPTIMISTIC",
+    }),
+    45_000,
+    "topUpMaster",
+  );
+  console.log(
+    `[near] topped up master with ${config.masterTopUpNear} NEAR (was ${Number(available) / 1e24})`,
+  );
+}
+
 export async function createSessionAccount(publicKey: string): Promise<string> {
   // A public hosted demo shares one Testnet treasury. Check the budget before
   // creating a subaccount, otherwise accounts are minted that cannot be funded.
@@ -141,14 +160,20 @@ export async function createSessionAccount(publicKey: string): Promise<string> {
       "The demo treasury is low, so new games are paused. Try again later.",
     );
   }
-  if (masterBalance < nearToYocto("0.1")) {
-    throw new Error(
-      "The demo is low on Testnet funds for new sessions. Try again later.",
-    );
+  // Every start_game/advance adds storage paid by the master, so a long-running
+  // demo slowly drains it. Refill from the treasury before it stalls a game.
+  if (masterBalance < nearToYocto(config.masterMinBalanceNear as `${number}`)) {
+    if (treasuryBalance < nearToYocto(config.masterTopUpNear as `${number}`)) {
+      throw new Error(
+        "The demo is low on Testnet funds for new sessions. Try again later.",
+      );
+    }
+    await ensureMasterFunded();
   }
+
   const prefix = `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-  // The master only pays account storage; the treasury funds the playable balance
-  // so repeated demos do not drain the game-master account.
+  // The master also pays contract storage; the treasury funds the playable
+  // balance so repeated demos do not drain the game-master account.
   await withTimeout(
     master.createSubAccount({
       accountOrPrefix: prefix,

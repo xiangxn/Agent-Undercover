@@ -44,6 +44,11 @@ export const config = {
   // Refuse new sessions below this treasury balance. The public demo cannot
   // drain a shared Testnet account faster than it can be topped up.
   treasuryFloorNear: env.TREASURY_FLOOR_NEAR ?? "0.5",
+  // The game-master signs start_game/advance/settle, so it pays the contract
+  // storage those calls add (~0.1 NEAR per game). Refill it from the treasury
+  // before it gets too low to start the next demo.
+  masterMinBalanceNear: env.MASTER_MIN_BALANCE_NEAR ?? "0.5",
+  masterTopUpNear: env.MASTER_TOPUP_NEAR ?? "2",
   maxSessions: Number(env.MAX_SESSIONS ?? 100),
   agentMinBalanceNear: env.AGENT_MIN_BALANCE_NEAR ?? "0.30",
   agentTopUpNear: env.AGENT_TOPUP_NEAR ?? "0.20",
