@@ -5,14 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
-    "demo:scripted": "tsx scripts/demo-scripted.ts"
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@agent-undercover/shared": "workspace:*",
     "dotenv": "^18.0.9",
-    "near-api-js": "^7.4.0"
+    "express": "^5.3.0",
+    "near-api-js": "^7.4.0",
+    "socket.io": "^4.8.4"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"

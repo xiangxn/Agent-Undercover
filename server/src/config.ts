@@ -1,0 +1,86 @@
+import { config as loadEnv } from "dotenv";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+loadEnv({ path: join(ROOT, ".env") });
+
+const env = process.env;
+
+function required(name: string): string {
+  const value = env[name];
+  if (!value) throw new Error(`Missing ${name} in .env`);
+  return value;
+}
+
+export const config = {
+  root: ROOT,
+  port: Number(env.PORT ?? 8787),
+  webOrigin: env.WEB_ORIGIN ?? "http://localhost:5173",
+  rpcUrl: env.NEAR_RPC_URL ?? "https://test.rpc.fastnear.com",
+  contractId: required("CONTRACT_ACCOUNT_ID"),
+  masterAccountId: required("MASTER_ACCOUNT_ID"),
+  masterPrivateKey: required("MASTER_PRIVATE_KEY"),
+  treasuryAccountId: required("TREASURY_ACCOUNT_ID"),
+  treasuryPrivateKey: required("TREASURY_PRIVATE_KEY"),
+  sessionFundingNear: env.SESSION_FUNDING_NEAR ?? "0.25",
+  sessionTopUpNear: env.SESSION_TOPUP_NEAR ?? "0.2",
+  agentMinBalanceNear: env.AGENT_MIN_BALANCE_NEAR ?? "0.30",
+  agentTopUpNear: env.AGENT_TOPUP_NEAR ?? "0.20",
+  demoMode: (env.DEMO_MODE ?? "scripted") as "live" | "scripted",
+  nearAiBaseUrl: env.NEAR_AI_BASE_URL ?? "https://cloud-api.near.ai/v1",
+  nearAiApiKey: env.NEAR_AI_API_KEY ?? "",
+  nearAiModel: env.NEAR_AI_MODEL || "Qwen/Qwen3-30B-A3B-Instruct-2507",
+  stakeYocto: env.AGENT_STAKE_YOCTO ?? "100000000000000000000000",
+  maxRounds: 3,
+  players: 5,
+  runsDir: join(ROOT, "runs"),
+};
+
+export type AgentId = "alpha" | "beta" | "gamma" | "delta";
+
+export interface AgentConfig {
+  id: AgentId;
+  name: string;
+  persona: string;
+  accountId: string;
+  gameKey: string;
+  walletKey: string;
+}
+
+export const agents: AgentConfig[] = [
+  {
+    id: "alpha",
+    name: "Alpha",
+    persona: "The analyst. Cites other players' words, builds logical cases, likes lists.",
+    accountId: required("AGENT_ALPHA_ACCOUNT_ID"),
+    gameKey: required("AGENT_ALPHA_PRIVATE_KEY"),
+    walletKey: required("AGENT_ALPHA_WALLET_PRIVATE_KEY"),
+  },
+  {
+    id: "beta",
+    name: "Beta",
+    persona: "The contrarian. Questions the majority and happily derails the room.",
+    accountId: required("AGENT_BETA_ACCOUNT_ID"),
+    gameKey: required("AGENT_BETA_PRIVATE_KEY"),
+    walletKey: required("AGENT_BETA_WALLET_PRIVATE_KEY"),
+  },
+  {
+    id: "gamma",
+    name: "Gamma",
+    persona: "The peacemaker. Agrees first, then adds a small observation; great at blending in.",
+    accountId: required("AGENT_GAMMA_ACCOUNT_ID"),
+    gameKey: required("AGENT_GAMMA_PRIVATE_KEY"),
+    walletKey: required("AGENT_GAMMA_WALLET_PRIVATE_KEY"),
+  },
+  {
+    id: "delta",
+    name: "Delta",
+    persona: "The chaos agent. Uses odd metaphors and jokes; hard to pin down.",
+    accountId: required("AGENT_DELTA_ACCOUNT_ID"),
+    gameKey: required("AGENT_DELTA_PRIVATE_KEY"),
+    walletKey: required("AGENT_DELTA_WALLET_PRIVATE_KEY"),
+  },
+];
+
+export const agentById = new Map(agents.map((agent) => [agent.id, agent]));
