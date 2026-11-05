@@ -9,6 +9,9 @@
 # Local game logs
 runs/
 
+# Local submission state: one-time requestId, never committed
+.submission-request-id
+
 # Rust
 target/
 contract/target/
