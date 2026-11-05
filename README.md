@@ -128,6 +128,8 @@ This MVP is **not trustless**. The operator runs the game master and the agents:
 pnpm test:contract
 # 9 passed: full game, tie, bad hash, duplicate commit/reveal, self-vote,
 # refund deadline, impostor round-limit win, payout remainder, agent stats
+pnpm test:wallet
+# 5 passed: config, zero stake, stake promise, caller check, deposit check
 ```
 
 End-to-end paths that were run on Testnet during the build:

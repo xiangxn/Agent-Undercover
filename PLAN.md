@@ -288,6 +288,7 @@
 - [x] 分账总额 == pot；余数处理正确
 - [x] Agent stats 只对 is_agent 更新
 - [x] `cargo clippy --all-targets -- -D warnings` 通过（2026-11-05）
+- [x] wallet 合约 5 个单测通过（`pnpm test:wallet`）
 
 ### 8.2 端到端
 

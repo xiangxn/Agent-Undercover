@@ -9,6 +9,8 @@
     "build:wallet": "cd contract/agent-wallet && cargo build --target wasm32-unknown-unknown --release",
     "build:contracts": "pnpm build:contract && pnpm build:wallet",
     "test:contract": "cd contract && cargo test",
+    "test:wallet": "cd contract/agent-wallet && cargo test",
+    "test": "pnpm test:contract && pnpm test:wallet",
     "setup:testnet": "node scripts/setup-testnet.mjs",
     "setup:agents": "node scripts/setup-agent-wallets.mjs",
     "deploy:contract": "node scripts/deploy-contract.mjs",
