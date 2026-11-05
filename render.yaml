@@ -1,0 +1,61 @@
+# Render Blueprint for the hosted demo.
+#
+# One Node service serves the API, Socket.IO, and the built web app. Account IDs
+# are public Testnet addresses; the private keys are entered in the Render
+# dashboard (sync: false) and never committed.
+services:
+  - type: web
+    name: agent-undercover
+    runtime: node
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @agent-undercover/web build
+    startCommand: pnpm --filter @agent-undercover/server start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DEMO_MODE
+        value: scripted
+      - key: NEAR_RPC_URL
+        value: https://test.rpc.fastnear.com
+      - key: CONTRACT_ACCOUNT_ID
+        value: game.agent-undercover.testnet
+      - key: MASTER_ACCOUNT_ID
+        value: agent-undercover.testnet
+      - key: TREASURY_ACCOUNT_ID
+        value: au-treasury.testnet
+      - key: AGENT_ALPHA_ACCOUNT_ID
+        value: alpha.agents.agent-undercover.testnet
+      - key: AGENT_BETA_ACCOUNT_ID
+        value: beta.agents.agent-undercover.testnet
+      - key: AGENT_GAMMA_ACCOUNT_ID
+        value: gamma.agents.agent-undercover.testnet
+      - key: AGENT_DELTA_ACCOUNT_ID
+        value: delta.agents.agent-undercover.testnet
+      - key: SESSION_FUNDING_NEAR
+        value: "0.25"
+      - key: TREASURY_FLOOR_NEAR
+        value: "0.5"
+      - key: MAX_SESSIONS
+        value: "30"
+      # Secrets: set these in the Render dashboard when prompted.
+      - key: MASTER_PRIVATE_KEY
+        sync: false
+      - key: TREASURY_PRIVATE_KEY
+        sync: false
+      - key: AGENT_ALPHA_PRIVATE_KEY
+        sync: false
+      - key: AGENT_ALPHA_WALLET_PRIVATE_KEY
+        sync: false
+      - key: AGENT_BETA_PRIVATE_KEY
+        sync: false
+      - key: AGENT_BETA_WALLET_PRIVATE_KEY
+        sync: false
+      - key: AGENT_GAMMA_PRIVATE_KEY
+        sync: false
+      - key: AGENT_GAMMA_WALLET_PRIVATE_KEY
+        sync: false
+      - key: AGENT_DELTA_PRIVATE_KEY
+        sync: false
+      - key: AGENT_DELTA_WALLET_PRIVATE_KEY
+        sync: false

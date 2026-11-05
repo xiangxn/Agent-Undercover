@@ -191,7 +191,9 @@ io.on("connection", (socket) => {
         console.log(`[session] create requested (${payload?.publicKey ?? "no key"})`);
         const ip = socket.handshake.address || "unknown";
         if (rateLimited(ip)) throw new Error("Too many sessions from this address; try again later.");
-        if (sessions.size >= 200) throw new Error("Demo capacity reached; try again shortly.");
+        if (sessions.size >= config.maxSessions) {
+          throw new Error("Demo capacity reached; try again shortly.");
+        }
         if (typeof payload?.publicKey !== "string") throw new Error("Missing public key");
         const publicKey = PublicKey.fromString(payload.publicKey).toString();
 

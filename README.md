@@ -89,6 +89,12 @@ pnpm deploy:contract      # deploy and initialize the game contract
 
 The scripts write `.keys/accounts.json` (gitignored, mode 600); copy those values into `.env`.
 
+### Deploy the hosted demo (Render)
+
+[render.yaml](render.yaml) defines one Node service that serves the API, Socket.IO, and the built web app. Connect the repo in Render, apply the Blueprint, and enter the private keys it prompts for (the values from `.env`). Public account IDs are already in the blueprint.
+
+The server uses Render's `RENDER_EXTERNAL_URL` for same-origin Socket.IO, so no URL configuration is needed. The free plan sleeps after inactivity, and in-memory games do not survive a restart. New sessions are refused when the treasury drops below `TREASURY_FLOOR_NEAR` (default 0.5 NEAR); top up the treasury before sharing the link.
+
 ### Modes
 
 - `DEMO_MODE=scripted` (default): deterministic agent lines; no AI API key. The full demo runs end-to-end.

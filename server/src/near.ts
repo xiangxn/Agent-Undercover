@@ -130,6 +130,22 @@ export function randomSalt(): string {
 }
 
 export async function createSessionAccount(publicKey: string): Promise<string> {
+  // A public hosted demo shares one Testnet treasury. Check the budget before
+  // creating a subaccount, otherwise accounts are minted that cannot be funded.
+  const [treasuryBalance, masterBalance] = await Promise.all([
+    balanceYocto(config.treasuryAccountId),
+    balanceYocto(config.masterAccountId),
+  ]);
+  if (treasuryBalance < nearToYocto(config.treasuryFloorNear as `${number}`)) {
+    throw new Error(
+      "The demo treasury is low, so new games are paused. Try again later.",
+    );
+  }
+  if (masterBalance < nearToYocto("0.1")) {
+    throw new Error(
+      "The demo is low on Testnet funds for new sessions. Try again later.",
+    );
+  }
   const prefix = `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   // The master only pays account storage; the treasury funds the playable balance
   // so repeated demos do not drain the game-master account.

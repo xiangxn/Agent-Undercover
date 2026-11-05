@@ -83,9 +83,18 @@ The MVP is **not trustless**:
 ## Deployment
 
 - Contract: NEAR Testnet.
-- Backend: Render/Fly (Node + WebSocket).
-- Web: Vercel.
+- App: one Node service (Render; `render.yaml`). Express serves the API, the
+  Socket.IO endpoint, the RPC relay, and the built web app from `web/dist`, so
+  there is no cross-origin setup. Render sets `RENDER_EXTERNAL_URL`, which the
+  server uses as the Socket.IO origin.
+- Web static hosting on Vercel is optional; it needs `WEB_ORIGIN` and the API
+  relay pointed at the backend.
 - AI: NEAR AI Cloud; scripted mode requires no API key.
+- Budget guard: new sessions are refused when the treasury is below
+  `TREASURY_FLOOR_NEAR` (default 0.5 NEAR) or the master is below 0.1 NEAR, and
+  the number of in-memory sessions is capped by `MAX_SESSIONS` (default 30).
+- The Render free plan sleeps after inactivity; the first request after sleep
+  pays a cold start. In-memory games do not survive a restart.
 
 ## Repo layout
 

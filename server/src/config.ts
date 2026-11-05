@@ -16,7 +16,9 @@ function required(name: string): string {
 export const config = {
   root: ROOT,
   port: Number(env.PORT ?? 8787),
-  webOrigin: env.WEB_ORIGIN ?? "http://localhost:5173",
+  // Render exposes the service URL; the server also serves the built web app,
+  // so same-origin Socket.IO works without configuring WEB_ORIGIN.
+  webOrigin: env.WEB_ORIGIN ?? env.RENDER_EXTERNAL_URL ?? "http://localhost:5173",
   rpcUrl: env.NEAR_RPC_URL ?? "https://test.rpc.fastnear.com",
   contractId: required("CONTRACT_ACCOUNT_ID"),
   masterAccountId: required("MASTER_ACCOUNT_ID"),
@@ -25,6 +27,10 @@ export const config = {
   treasuryPrivateKey: required("TREASURY_PRIVATE_KEY"),
   sessionFundingNear: env.SESSION_FUNDING_NEAR ?? "0.25",
   sessionTopUpNear: env.SESSION_TOPUP_NEAR ?? "0.2",
+  // Refuse new sessions below this treasury balance. The public demo cannot
+  // drain a shared Testnet account faster than it can be topped up.
+  treasuryFloorNear: env.TREASURY_FLOOR_NEAR ?? "0.5",
+  maxSessions: Number(env.MAX_SESSIONS ?? 30),
   agentMinBalanceNear: env.AGENT_MIN_BALANCE_NEAR ?? "0.30",
   agentTopUpNear: env.AGENT_TOPUP_NEAR ?? "0.20",
   demoMode: (env.DEMO_MODE ?? "scripted") as "live" | "scripted",
