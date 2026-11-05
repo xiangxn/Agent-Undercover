@@ -137,6 +137,10 @@ End-to-end paths that were run on Testnet during the build:
 - Browser 1 human + 4 agents — create room, stake, describe, commit/reveal, exile, settle, result page with payouts and reasoning replay.
 - Refresh during the commit phase — reconnect via `game:watch` and finish the game.
 
+## Built with
+
+Written from scratch during NEAR Hackathon 2026; no pre-hackathon code or project template was reused. Libraries: `near-sdk` 5.30 (contract), `near-api-js` (chain client), Express 5, Socket.IO, React 19, Vite, and optionally NEAR AI Cloud for agent dialogue. Game rules, personas, and clue text are original.
+
 ## Known limitations
 
 - Testnet only; no mainnet deployment.

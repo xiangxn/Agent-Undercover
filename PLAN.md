@@ -118,7 +118,7 @@
 - [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞（2026-11-05 已备好 `render.yaml` 与 `RENDER_EXTERNAL_URL` 同源配置；等推送与 Render 账号）
 - [x] 部署预算保护：treasury/master 余额下限、`MAX_SESSIONS` 上限；server typecheck 通过
 - [ ] **23:59 UTC 功能冻结**
-- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；当前工作树 scripted demo 复跑 exit 0；fresh clone 待最终验证
+- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；连续 3 局已过；当前工作树 scripted demo 复跑 exit 0；2026-11-05 fresh clone 全流程验证通过
 
 ### Day 5 · 11-09
 
@@ -144,18 +144,18 @@
 
 - [ ] 公开 GitHub repo，URL 可匿名访问
 - [x] LICENSE（MIT）
-- [ ] README 英文，含：
-  - [ ] 产品是什么、解决什么问题
-  - [ ] “do X - see Y” 的可复现步骤
-  - [ ] `DEMO_MODE=scripted` 无 API key 跑法
-  - [ ] 架构图 / 信任模型
-  - [ ] Testnet 合约地址 + Agent 账户 Explorer 链接
-  - [ ] track mapping（games / agents / swarms）
-  - [ ] 测试命令与结果
-  - [ ] baseline / 第三方模板声明
-- [ ] `.env.example`，无真实 key
-- [ ] `git log` 可看出 2026-11-01 之后的工作（Q-001/Q-003）
-- [ ] 若用了任何模板/旧代码，README 披露
+- [x] README 英文，含：
+  - [x] 产品是什么、解决什么问题
+  - [x] “do X - see Y” 的可复现步骤
+  - [x] `DEMO_MODE=scripted` 无 API key 跑法
+  - [x] 架构图 / 信任模型
+  - [x] Testnet 合约地址 + Agent 账户 Explorer 链接
+  - [x] track mapping（games / agents / swarms）
+  - [x] 测试命令与结果
+  - [x] baseline / 第三方模板声明
+- [x] `.env.example`，无真实 key
+- [x] `git log` 可看出 2026-11-01 之后的工作（Q-001/Q-003；全部提交在 2026-11-05）
+- [x] 若用了任何模板/旧代码，README 披露（未使用；README “Built with” 已声明）
 
 ### 4.2 Demo
 
@@ -232,6 +232,9 @@
 ## 7. 提交 payload 模板
 
 > 不要直接发送。先生成 requestId，打印，human 确认。
+>
+> 2026-11-05 已加 `scripts/prepare-submission.mjs`：校验字段、从 PRD §12.5 读取 `idea`、把 requestId 存到 `.submission-request-id`（gitignored，重试复用），只打印 JSON / 表单字段 / curl，不发送。用法：
+> `node scripts/prepare-submission.mjs --project-url <repo> --demo-url <X post> --consent`
 
 ```json
 {
@@ -289,14 +292,15 @@
 - [x] `pnpm demo:scripted`：无 AI key，Testnet 完整一局
 - [ ] `DEMO_MODE=live`：真实 AI 完整一局
 - [x] 浏览器：1 真人 + 4 Agent 完整一局（2026-11-05）
-- [ ] 断网/无 key → fallback 到 scripted
+- [x] 无 key → fallback 到 scripted（2026-11-05 `DEMO_MODE=live` 验证）
+- [ ] 真实 AI 超时/断网 → fallback（待 `NEAR_AI_API_KEY`）
 - [x] 刷新页面 → 重连并恢复状态（2026-11-05）
-- [ ] 新 clone → 按 README 跑通 scripted
+- [x] 新 clone → 按 README 跑通 scripted（2026-11-05 `/tmp/au-fresh`：install、web build、server typecheck、9 个合约测试、scripted 局 all exit 0）
 
 ### 8.3 评委可复现性
 
-- [ ] README 的每条命令在干净目录执行过
-- [ ] `.env.example` 每个变量有说明（已补齐 treasury/top-up 变量，待逐项注释）
+- [x] README 的每条命令在干净目录执行过（2026-11-05：install / build / typecheck / test / demo / dev:server 健康检查）
+- [x] `.env.example` 每个变量有说明（2026-11-05 补 `TREASURY_FLOOR_NEAR` / `MAX_SESSIONS`）
 - [ ] 不需要主网、不需要付费服务即可看 scripted demo
 - [ ] 合约地址和交易 hash 可在 Explorer 打开
 - [ ] 视频链接、hosted demo 链接、repo 链接都可匿名访问
