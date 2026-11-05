@@ -15,7 +15,7 @@
 - [x] 合约部署在 NEAR Testnet，地址写进 README（`game.agent-undercover.testnet` 已部署并初始化）
 - [x] 4 个 Agent 持久子账户，`view_access_keys` 显示只有 scoped FunctionCall key，无 full-access key（2026-11-05 raw RPC 复核：每个账户恰好两个 FunctionCall key）
 - [x] `pnpm demo:scripted` 不需要 AI API key，能在 Testnet 跑完一局 5 人局并结算（2026-11-05 复跑 exit 0：Crew 胜，4 winners，5 条描述 / 5 个 reveal）
-- [ ] `DEMO_MODE=live` 用 NEAR AI Cloud 跑完一局，AI 输出可读、可回放
+- [x] `DEMO_MODE=live` 用 NEAR AI Cloud 跑完一局，AI 输出可读、可回放（2026-11-06：GLM 5.3 Flash，2 轮 Crew 胜，7/7 决策均来自 AI，描述互相引用、推理指出真人发言含糊，0 console error）
 - [x] 浏览器里 1 真人 + 4 Agent 完整玩一局：质押 → 描述 → commit-reveal 投票 → 放逐 → 结算（2026-11-05 run 20 完整走通）
 - [x] 结果页展示：胜方、分账、Agent 余额变化、Explorer 链接、AI 私有推理回放（2026-11-05 run 20：7 张推理卡，0 console error）
 - [ ] 60–90 秒 demo 视频已发布到 X，满足 HACKATHON.md 的 tag 要求
@@ -100,7 +100,7 @@
 - [x] Frontend v1：Landing/Lobby/Game/Result + Socket.IO + session key
 - [x] 验收：浏览器能加入并看到状态（2026-11-05 多次完整对局）
 - [x] 无 key 自动 fallback（2026-11-05 `DEMO_MODE=live` + 空 `NEAR_AI_API_KEY`，`decideTurn` 返回 `source=scripted`）
-- [ ] `DEMO_MODE=live` + `NEAR_AI_API_KEY` 跑完一局（待 human 提供 key）
+- [x] `DEMO_MODE=live` + `NEAR_AI_API_KEY` 跑完一局（2026-11-06：GLM 5.3 Flash + `reasoning_effort=low`；2 轮、7 次 AI 决策、0 fallback、0 console error）
 
 ### Day 4 · 11-08
 
@@ -297,10 +297,10 @@
 ### 8.2 端到端
 
 - [x] `pnpm demo:scripted`：无 AI key，Testnet 完整一局
-- [ ] `DEMO_MODE=live`：真实 AI 完整一局
+- [x] `DEMO_MODE=live`：真实 AI 完整一局（2026-11-06 浏览器 2 轮局，7/7 AI 决策）
 - [x] 浏览器：1 真人 + 4 Agent 完整一局（2026-11-05）
 - [x] 无 key → fallback 到 scripted（2026-11-05 `DEMO_MODE=live` 验证）
-- [x] AI 请求失败 → fallback 到 scripted（2026-11-05 用不可达 endpoint 验证）；真实 AI 成功路径待 `NEAR_AI_API_KEY`
+- [x] AI 请求失败 → fallback 到 scripted（2026-11-05 用不可达 endpoint 验证）；真实 AI 成功路径 2026-11-06 已验证
 - [x] 刷新页面 → 重连并恢复状态（2026-11-05）
 - [x] 新 clone → 按 README 跑通 scripted（2026-11-05 `/tmp/au-fresh`：install、web build、server typecheck、9 个合约测试、scripted 局 all exit 0）
 
