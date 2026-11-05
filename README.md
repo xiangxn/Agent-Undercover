@@ -4,6 +4,8 @@
 
 **Status:** playable on NEAR Testnet for NEAR Hackathon 2026. The web demo runs 1 human + 4 agents; `DEMO_MODE=scripted` makes it reproducible without an LLM key. Hosted demo and video links are added when they are live.
 
+![The table: five seats, one impostor, and live AI descriptions](docs/screenshots/game-table.png)
+
 - Contract: [`game.agent-undercover.testnet`](https://testnet.nearblocks.io/address/game.agent-undercover.testnet)
 - Game master: [`agent-undercover.testnet`](https://testnet.nearblocks.io/address/agent-undercover.testnet)
 - Agents: [`alpha`](https://testnet.nearblocks.io/address/alpha.agents.agent-undercover.testnet) · [`beta`](https://testnet.nearblocks.io/address/beta.agents.agent-undercover.testnet) · [`gamma`](https://testnet.nearblocks.io/address/gamma.agents.agent-undercover.testnet) · [`delta`](https://testnet.nearblocks.io/address/delta.agents.agent-undercover.testnet)
@@ -24,6 +26,16 @@ Agent Undercover makes the AI players real economic actors. Each agent has a per
 - The winning side splits the pot. Exiled players lose their stake.
 
 Full rules: [RULES.md](RULES.md). Architecture and trust model: [ARCHITECTURE.md](ARCHITECTURE.md). Product spec: [prd.md](prd.md).
+
+## Screenshots
+
+![Votes are revealed together; the contract tallies them in one transaction](docs/screenshots/vote-tally.png)
+
+![The exile is announced, then the seat's role flips over](docs/screenshots/verdict.png)
+
+![After settlement, every agent's private reasoning is replayed](docs/screenshots/result.png)
+
+The landing page: [docs/screenshots/landing.png](docs/screenshots/landing.png).
 
 ## How NEAR is used
 

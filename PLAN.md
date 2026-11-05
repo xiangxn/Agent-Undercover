@@ -115,7 +115,7 @@
 - [ ] 错误态、重连、超时、空房间、计时器（重连/计时器/刷新恢复已过；空房间与容量上限未压测）
 - [x] 连续跑 3 局无手动干预；无 console error（2026-11-05 run 17/18/19 同一 server 进程，全部 Crew 胜、7 张推理卡、exit 0；期间 RPC 408 均由链上恢复）
 - [x] 重启 server 后回归：run 20（2026-11-05，Crew 胜，human 卧底，7 张推理卡，0 console error；commit 超时 2 次、reveal 超时 1 次，重试后均恢复）
-- [x] README v1（run steps、架构、trust model、track mapping；2026-11-05 已改为当前真实流程）
+- [x] README v1（run steps、架构、trust model、track mapping；2026-11-05 已改为当前真实流程；2026-11-06 加入 `docs/screenshots/` 实机截图并嵌入 README）
 - [x] Hosted deploy（Backend + Web）（2026-11-05 Render 新账号要求绑卡，改用 Railway：`https://agent-undercover-production.up.railway.app`；`SESSION_FUNDING_NEAR=0.25` 覆盖 0.1 质押 + ~0.1 房间存储，低于 0.22 拒绝启动；重新部署后浏览器 smoke 完整两局：Crew 胜、分账正确、7 张推理卡、0 console error）
 - [x] Hosted treasury 充值路径：helper 网页已 404 但 `POST /account` 仍可开户，`scripts/topup-treasury.mjs` 用临时账户 + `deleteAccount` 扫入 treasury；两次充值后曾达约 21.8 NEAR（≈87 局），对局消耗后余额下降，开新局前看 server 预检
 - [x] 部署预算保护：treasury/master 余额下限、`MAX_SESSIONS` 上限；server typecheck 通过
