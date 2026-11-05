@@ -904,7 +904,7 @@ function GameScreen({
           <small>one sentence each · everyone is watching</small>
         </div>
       )}
-      <div className="game-top">
+      <div className={`game-top ${roundBanner !== null ? "is-overlaid" : ""}`}>
         <div className="round-block">
           <span className="muted tiny">ROUND</span>
           <strong>

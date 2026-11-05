@@ -725,6 +725,12 @@ a:hover {
   flex-direction: row !important;
   align-items: center;
   gap: 12px !important;
+  transition: opacity 0.3s ease;
+}
+
+/* The round banner sits over this strip; fade it out so the two do not mix. */
+.game-top.is-overlaid .phase-block {
+  opacity: 0;
 }
 
 .phase-chip {
