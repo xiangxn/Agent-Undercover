@@ -148,7 +148,7 @@
 
 ### 4.1 Repo / 代码
 
-- [ ] 公开 GitHub repo，URL 可匿名访问
+- [x] 公开 GitHub repo，URL 可匿名访问（`https://github.com/xiangxn/Agent-Undercover`，2026-11-06 匿名 API 200；本地新提交待 push）
 - [x] LICENSE（MIT）
 - [x] README 英文，含：
   - [x] 产品是什么、解决什么问题
@@ -184,7 +184,7 @@
 - [ ] size: `1`
 - [ ] tracks: `["games","agents","swarms"]`
 - [ ] nearAddress: `x-bit.near`
-- [ ] projectUrl: 公开 repo URL
+- [x] projectUrl: `https://github.com/xiangxn/Agent-Undercover`（公开仓库，匿名访问返回 200）
 - [ ] demoUrl: 公开 X post URL
 - [ ] idea: PRD 12.5 的文案（20–2000 字符）
 - [ ] consent: human 逐字确认 HACKATHON.md 的联系声明
@@ -240,7 +240,7 @@
 > 不要直接发送。先生成 requestId，打印，human 确认。
 >
 > 2026-11-05 已加 `scripts/prepare-submission.mjs`：校验字段、从 PRD §12.5 读取 `idea`、把 requestId 存到 `.submission-request-id`（gitignored，重试复用），只打印 JSON / 表单字段 / curl，不发送。用法：
-> `node scripts/prepare-submission.mjs --project-url <repo> --demo-url <X post> --consent`
+> `node scripts/prepare-submission.mjs --project-url https://github.com/xiangxn/Agent-Undercover --demo-url <X post> --consent`
 
 ```json
 {
@@ -251,7 +251,7 @@
   "size": "1",
   "tracks": ["games", "agents", "swarms"],
   "nearAddress": "x-bit.near",
-  "projectUrl": "https://github.com/<user>/agent-undercover",
+  "projectUrl": "https://github.com/xiangxn/Agent-Undercover",
   "demoUrl": "<X post URL>",
   "idea": "<PRD 12.5 文案>",
   "consent": true
@@ -259,7 +259,7 @@
 ```
 
 **发送前**
-- [ ] `projectUrl` 匿名可访问
+- [x] `projectUrl` 匿名可访问（2026-11-06 已验证）
 - [ ] `demoUrl` 公开可访问
 - [ ] `nearAddress` 是主网命名账户（`x-bit.near`）
 - [ ] `size` 精确为 `1`
