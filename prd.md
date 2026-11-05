@@ -96,7 +96,7 @@ NEAR 的账户模型刚好提供了这四样：
 - 每人拿到一个词，卧底拿到近义词；每人每轮公开说一句话描述自己的词。
 - 描述不能说出词本身；说得好不好、是否和别人的描述矛盾，就是证据。
 - 卧底 AI 需要在“听起来合理”和“不暴露自己”之间做取舍；好人 AI 需要从描述里找矛盾。
-- 游戏结束后回放每个 Agent 的私有推理和卧底之间的串供记录，让“AI 怎么骗人”变得可见。
+- 游戏结束后回放每个 Agent 的私有推理，让“AI 怎么骗人”变得可见。
 
 ### 3.4 明确不声称的东西
 
@@ -116,7 +116,7 @@ NEAR 的账户模型刚好提供了这四样：
 | 项目 | MVP 默认 | 说明 |
 |---|---|---|
 | 玩家数 | 5 | 1 真人 + 4 Agent（Demo）；真实多人时 Agent 补位 |
-| 卧底数 | 1 | 5 人局 1 卧底；6 人局可配 2 卧底 |
+| 卧底数 | 1 | 5 人局固定 1 卧底；多卧底配置在 Roadmap |
 | 阵营 | Crew / Impostor | 真人可以是任意阵营；Agent 也可以是任意阵营 |
 | 轮数 | 最多 3 轮 | 每轮：描述 → 投票 → 放逐 |
 | 词语 | 每局一对近义词 | 如 wallet / account、block / receipt、validator / node |
@@ -255,7 +255,7 @@ Scripted 模式仍然走**真实 Testnet 交易**：真实质押、真实 commit
 - **一句话就能看懂**：你是唯一的人类，其他 4 个是 AI；其中 1 个在撒谎。你能找出来吗？
 - **有证据可推理**：每个人每轮的一句话都是公开的，矛盾会累积。
 - **有金钱后果**：AI 真的在用自己的钱玩；它赢了，钱进它的账户。
-- **有反转可看**：结束后回放 AI 的私有推理和卧底串供，观众能看到“它当时为什么这么说”。
+- **有反转可看**：结束后回放 AI 的私有推理，观众能看到“它当时为什么这么说”。
 - **Demo 的黄金 10 秒**：浏览器里 Agent 子账户余额在结算后增加，点开 explorer 看到 `view_access_keys` 只有两把受限 key，以及一个没有提款方法的 wallet 合约。
 
 ---
@@ -280,8 +280,6 @@ Scripted 模式仍然走**真实 Testnet 交易**：真实质押、真实 commit
 - 自己的词、阵营、人设；
 - 当前轮数、存活玩家列表；
 - 所有历史公开描述与被放逐记录；
-- 自己的账户余额和本局质押（让“输赢有代价”进入决策）；
-- 若自己是卧底且 6 人局有同伴：同伴身份、私下串供记录；
 - 输出格式要求。
 
 ### 5.3 输出契约
@@ -289,17 +287,12 @@ Scripted 模式仍然走**真实 Testnet 交易**：真实质押、真实 commit
 ```json
 {
   "description": "one public sentence, <= 280 bytes, must not contain my word",
-  "vote": "player_account_or_alias",
+  "suspect": "player_account_or_alias",
   "reasoning": "private reasoning, shown only after the game"
 }
 ```
 
-卧底额外一步：
-
-1. **Strategy call**：`{ "plan": "...", "deflect_to": "...", "why": "..." }`
-2. **Utterance call**：根据 plan 生成公开描述和投票。
-
-Crew 可以只做一次 call；时间允许时也做一次 strategy call，形成“策略 → 发言”的两段式，作为 `swarms` 赛道的多 Agent 协作展示。
+每次决策是一次结构化输出：`description`、`suspect`、`reasoning` 同时返回，校验失败重试一次。没有单独的 strategy call；`swarms` 展示的是四个 Agent 的独立私有推理，而不是跨 Agent 串供。
 
 ### 5.4 校验与降级
 
@@ -308,7 +301,7 @@ Crew 可以只做一次 call；时间允许时也做一次 strategy call，形�
 - 投票目标必须是存活且不是自己。
 - 校验失败 → 带错误信息重试 1 次 → 仍失败则使用该人设的 scripted fallback。
 - 单次调用超时 20s；整轮并行调用；整轮超时 45s 则全体 fallback。
-- 所有 prompt / 输出 / reasoning 写入 `runs/<room_id>.jsonl`，游戏结束后供回放；游戏中不泄露。
+- 所有 prompt / 输出 / reasoning 写入 `runs/<agent_id>.jsonl`（按 Agent 分文件），游戏结束后供回放；游戏中不泄露。
 
 ### 5.5 NEAR AI Cloud 接入
 
@@ -323,11 +316,10 @@ Crew 可以只做一次 call；时间允许时也做一次 strategy call，形�
 结果页展示：
 
 - 每个 Agent 每轮的 `reasoning`；
-- 卧底 AI 的 strategy plan 和串供记录；
 - 每个 Agent 的余额变化、历史战绩；
-- 一个时间轴：哪一句话让谁开始怀疑谁。
+- 结果页按轮次分组展示；交互式时间轴在 Roadmap。
 
-这是 `swarms` 赛道最有说服力的部分：不是“几个 bot 聊天”，而是有私有策略、有联盟、有经济后果的多 Agent 对抗。
+这是 `swarms` 赛道最有说服力的部分：不是“几个 bot 聊天”，而是有私有推理、有经济后果的多 Agent 对抗。
 
 ---
 
@@ -578,7 +570,7 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 ### 10.1 必做（Must）
 
 1. **合约**：5 人房、质押、commit-reveal 角色/投票、tally、放逐、结算、退款、Agent 战绩；Rust 单测。
-2. **Agent 账户**：4 个持久子账户，每个部署 stake-only wallet 合约，账户只有两把 scoped FunctionCall key，初始余额，公开战绩页。
+2. **Agent 账户**：4 个持久子账户，每个部署 stake-only wallet 合约，账户只有两把 scoped FunctionCall key，初始余额，结果页展示战绩。
 3. **Backend**：房间状态机、WebSocket、AI Cloud 并行调用、scripted 模式、Agent 签名、结算 worker。
 4. **Frontend**：Landing、Lobby、Game、Result/Replay；浏览器 session key 签名；不要求钱包插件。
 5. **Demo**：1 真人 + 4 Agent 一局可完整跑通；结果页展示链上分账和 Agent 余额变化。
@@ -611,7 +603,7 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 |---|---|---|
 | `games`（主） | 游戏循环、NPC 有钱包、玩家感觉不到链、真实经济 | 5 分钟一局、4 个 Agent 自有账户和质押、session key 免插件、结果页链上分账 |
 | `agents` | Agent 赚钱/花钱/谈判/持久身份 | Agent 用自己的余额质押、奖金进自己账户、跨局战绩/收益、scoped keys + stake-only wallet 保证运营方也提不走 |
-| `swarms` | 多 Agent 协调、竞争、 emergent economy | 4 个 Agent 各自策略；卧底 AI 私下串供；策略→发言两段式；结束后回放联盟和背叛 |
+| `swarms` | 多 Agent 协调、竞争、 emergent economy | 4 个 Agent 各自私有推理与投票；并行决策；结束后回放每个 Agent 的推理和经济结果 |
 
 **提交 tracks**：`["games", "agents", "swarms"]`，主攻 `games`。README 用一张表逐条对应官方 hints，不要只写“我们也支持”。
 
@@ -709,10 +701,12 @@ MVP 后端可以直接轮询 view 方法；事件是加分项。
 1. **IronClaw TEE key custody**：Agent 私钥进入 TEE，去掉后端代签；attestation 可验证。
 2. **NEP-366 gasless entry**：新玩家无需准备 NEAR；relayer 代付 Gas。
 3. **Confidential Intents**：跨链隐私稳定币奖池（主网）。
-4. **更多 Agent 人设 / 词库 / 任务类型**。
-5. **多人房间匹配**：2–6 真人 + Agent 补位。
-6. **Agent 市场**：Agent 可以被其他玩家雇佣/投资，收益分成。
-7. **锦标赛/赛季**：Agent 信誉和收益率排行榜。
+4. **更丰富的多 Agent 协作**：卧底串供、strategy → utterance 两段式、联盟与背叛回放；需要 6 人局/多卧底配置。
+5. **结果页交互式推理时间轴**：哪一句话让谁开始怀疑谁。
+6. **更多 Agent 人设 / 词库 / 任务类型**。
+7. **多人房间匹配**：2–6 真人 + Agent 补位。
+8. **Agent 市场**：Agent 可以被其他玩家雇佣/投资，收益分成。
+9. **锦标赛/赛季**：Agent 信誉和收益率排行榜。
 
 ---
 
