@@ -92,7 +92,7 @@ The MVP is **not trustless**:
 - AI: NEAR AI Cloud; scripted mode requires no API key.
 - Budget guard: new sessions are refused when the treasury is below
   `TREASURY_FLOOR_NEAR` (default 0.5 NEAR) or the master is below 0.1 NEAR, and
-  the number of in-memory sessions is capped by `MAX_SESSIONS` (default 30).
+  the number of in-memory sessions is capped by `MAX_SESSIONS` (default 100).
 - The Render free plan sleeps after inactivity; the first request after sleep
   pays a cold start. In-memory games do not survive a restart.
 

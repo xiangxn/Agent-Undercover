@@ -30,7 +30,7 @@ export const config = {
   // Refuse new sessions below this treasury balance. The public demo cannot
   // drain a shared Testnet account faster than it can be topped up.
   treasuryFloorNear: env.TREASURY_FLOOR_NEAR ?? "0.5",
-  maxSessions: Number(env.MAX_SESSIONS ?? 30),
+  maxSessions: Number(env.MAX_SESSIONS ?? 100),
   agentMinBalanceNear: env.AGENT_MIN_BALANCE_NEAR ?? "0.30",
   agentTopUpNear: env.AGENT_TOPUP_NEAR ?? "0.20",
   demoMode: (env.DEMO_MODE ?? "scripted") as "live" | "scripted",
