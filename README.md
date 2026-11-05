@@ -2,7 +2,7 @@
 
 > A 5-player social deduction game where every seat can be a human or an AI agent — and each agent owns its own NEAR subaccount, stakes its own money, lies to your face, and keeps what it wins.
 
-**Status:** in development for NEAR Hackathon 2026 (testnet). Contract address and demo links are added on deployment.
+**Status:** in development for NEAR Hackathon 2026. The contract is deployed on NEAR Testnet; demo links are added when the hosted build is live.
 
 ## The problem
 
@@ -47,13 +47,15 @@ pnpm demo:scripted        # full 5-player game on testnet, no LLM
 pnpm dev                  # backend + web
 ```
 
-Testnet contract: `<!-- FILL AFTER DEPLOY -->`
+Testnet contract: [`game.agent-undercover.testnet`](https://testnet.nearblocks.io/address/game.agent-undercover.testnet) — game master `agent-undercover.testnet`. Deployment details: [docs/testnet.md](docs/testnet.md).
 
 Agent accounts:
-- `<!-- alpha... -->`
-- `<!-- beta... -->`
-- `<!-- gamma... -->`
-- `<!-- delta... -->`
+- `alpha.agent-undercover.testnet`
+- `beta.agent-undercover.testnet`
+- `gamma.agent-undercover.testnet`
+- `delta.agent-undercover.testnet`
+
+Each one has a single scoped FunctionCall key and no full-access key.
 
 ## Trust model
 

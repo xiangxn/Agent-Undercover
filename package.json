@@ -7,9 +7,14 @@
   "scripts": {
     "build:contract": "cd contract && cargo build --target wasm32-unknown-unknown --release",
     "test:contract": "cd contract && cargo test",
+    "setup:testnet": "node scripts/setup-testnet.mjs",
+    "deploy:contract": "node scripts/deploy-contract.mjs",
     "demo:scripted": "pnpm --filter @agent-undercover/server demo:scripted",
     "dev:server": "pnpm --filter @agent-undercover/server dev",
     "dev:web": "pnpm --filter @agent-undercover/web dev",
     "dev": "pnpm --parallel --filter @agent-undercover/server --filter @agent-undercover/web dev"
+  },
+  "devDependencies": {
+    "near-api-js": "^7.4.0"
   }
 }

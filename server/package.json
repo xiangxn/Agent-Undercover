@@ -7,5 +7,14 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "demo:scripted": "tsx scripts/demo-scripted.ts"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "near-api-js": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }
