@@ -1542,17 +1542,20 @@ function ResultScreen({
             <span className="tiny muted">persistent across games</span>
           </div>
           <div className="stat-rows">
-            {result.agentBalances.map((balance) => (
-              <div className="stat-row" key={balance.agentId}>
-                <strong>{balance.name}</strong>
-                <span className="tiny">
-                  {balance.stats.games} games · {balance.stats.wins}W-{balance.stats.losses}L
-                </span>
-                <span className="tiny positive">
-                  +{formatNear(balance.stats.earnings_yocto, 4)} N earned
-                </span>
-              </div>
-            ))}
+            {result.agentBalances.map((balance) => {
+              const earnings = BigInt(balance.stats.earnings_yocto);
+              return (
+                <div className="stat-row" key={balance.agentId}>
+                  <strong>{balance.name}</strong>
+                  <span className="tiny">
+                    {balance.stats.games} games · {balance.stats.wins}W-{balance.stats.losses}L
+                  </span>
+                  <span className={`tiny ${earnings >= 0n ? "positive" : "negative"}`}>
+                    {signedNear(earnings)} N earned
+                  </span>
+                </div>
+              );
+            })}
           </div>
           <div className="settle-tx">
             <span className="tiny muted">SETTLED</span>
