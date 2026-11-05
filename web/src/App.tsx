@@ -6,8 +6,10 @@ import type {
   GameSnapshot,
   Phase,
   PrivatePlayerView,
+  Role,
   SessionInfo,
   SessionResponse,
+  VoteView,
 } from "@agent-undercover/shared";
 import { PHASE_LABEL } from "@agent-undercover/shared";
 import {
@@ -39,6 +41,13 @@ interface LogEntry {
   id: string;
   message: string;
   txHash?: string;
+}
+
+interface RoundVerdict {
+  round: number;
+  exiled: string | null;
+  role?: Role;
+  votes: VoteView[];
 }
 
 interface AgentApi {
@@ -801,7 +810,9 @@ function GameScreen({
   const [draft, setDraft] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [verdict, setVerdict] = useState<RoundVerdict | null>(null);
   const [now, setNow] = useState(Date.now());
+  const lastVerdictRound = useRef(0);
   const me = snapshot.players.find((player) => player.account === account);
   const alivePlayers = snapshot.players.filter((player) => player.alive);
   const currentDescriptions = snapshot.descriptions.filter(
@@ -828,6 +839,29 @@ function GameScreen({
   useEffect(() => {
     setSelected(null);
   }, [snapshot.phase, snapshot.round]);
+
+  // The chain resolves a round inside a couple of ticks, so the role reveal can
+  // be gone before anyone reads it. Hold a local verdict card with the round's
+  // final tally, then let the table continue underneath.
+  useEffect(() => {
+    if (snapshot.phase !== "rolereveal") return;
+    if (lastVerdictRound.current === snapshot.round) return;
+    lastVerdictRound.current = snapshot.round;
+    setVerdict({
+      round: snapshot.round,
+      exiled: snapshot.pendingExile,
+      role: snapshot.pendingExile
+        ? snapshot.revealedRoles?.[snapshot.pendingExile]
+        : undefined,
+      votes: snapshot.votes.filter((vote) => vote.round === snapshot.round),
+    });
+  }, [snapshot.phase, snapshot.round, snapshot.pendingExile, snapshot.revealedRoles, snapshot.votes]);
+
+  useEffect(() => {
+    if (!verdict) return;
+    const timer = setTimeout(() => setVerdict(null), 5200);
+    return () => clearTimeout(timer);
+  }, [verdict]);
 
   const submit = async () => {
     const text = draft.trim();
@@ -880,39 +914,54 @@ function GameScreen({
                 const votedByMe = snapshot.votes.some(
                   (vote) => vote.round === snapshot.round && vote.target === player.account,
                 );
+                const description = currentDescriptions.find(
+                  (item) => item.account === player.account,
+                );
                 return (
-                  <button
-                    key={player.account}
-                    className={`player-card ${!player.alive ? "dead" : ""} ${selectedHere ? "selected" : ""} ${player.account === account ? "you" : ""}`}
-                    disabled={!canVote || !player.alive || player.account === account}
-                    onClick={() => setSelected(player.account)}
-                  >
-                    <div className="player-top">
-                      <div
-                        className="player-avatar"
-                        style={{
-                          background: player.agentId
-                            ? PERSONA_COLORS[player.agentId]
-                            : "#d8e2ff",
-                        }}
-                      >
-                        {player.name.slice(0, 1)}
+                  <div className="seat-column" key={player.account}>
+                    <button
+                      className={`player-card ${!player.alive ? "dead" : ""} ${selectedHere ? "selected" : ""} ${player.account === account ? "you" : ""}`}
+                      disabled={!canVote || !player.alive || player.account === account}
+                      onClick={() => setSelected(player.account)}
+                    >
+                      <div className="player-top">
+                        <div
+                          className="player-avatar"
+                          style={{
+                            background: player.agentId
+                              ? PERSONA_COLORS[player.agentId]
+                              : "#d8e2ff",
+                          }}
+                        >
+                          {player.name.slice(0, 1)}
+                        </div>
+                        <div className="player-name">
+                          <strong>{player.name}</strong>
+                          <span className="tiny muted">{short(player.account)}</span>
+                        </div>
+                        <span className={`tag ${player.isAgent ? "tag-ai" : "tag-human"}`}>
+                          {player.account === account ? "YOU" : player.isAgent ? "AI" : "HUMAN"}
+                        </span>
                       </div>
-                      <div className="player-name">
-                        <strong>{player.name}</strong>
-                        <span className="tiny muted">{short(player.account)}</span>
+                      <div className="player-bottom">
+                        <span className={`status ${player.alive ? "alive" : "exiled"}`}>
+                          {player.alive ? "alive" : exiled ? "exiled" : "out"}
+                        </span>
+                        {votedByMe && <span className="tiny muted">voted</span>}
                       </div>
-                      <span className={`tag ${player.isAgent ? "tag-ai" : "tag-human"}`}>
-                        {player.account === account ? "YOU" : player.isAgent ? "AI" : "HUMAN"}
-                      </span>
-                    </div>
-                    <div className="player-bottom">
-                      <span className={`status ${player.alive ? "alive" : "exiled"}`}>
-                        {player.alive ? "alive" : exiled ? "exiled" : "out"}
-                      </span>
-                      {votedByMe && <span className="tiny muted">voted</span>}
-                    </div>
-                  </button>
+                      {!player.alive && <span className="player-stamp">EXILED</span>}
+                    </button>
+                    <SeatBubble
+                      text={description?.text}
+                      mine={player.account === account}
+                      thinking={
+                        snapshot.phase === "describing" &&
+                        player.alive &&
+                        player.isAgent &&
+                        !description
+                      }
+                    />
+                  </div>
                 );
               })}
             </div>
@@ -952,6 +1001,8 @@ function GameScreen({
               </div>
             )}
           </section>
+
+          {snapshot.phase === "votereveal" && <TallyPanel snapshot={snapshot} />}
 
           <section className="panel composer-panel">
             <div className="panel-head">
@@ -998,17 +1049,9 @@ function GameScreen({
               </p>
             )}
 
-            <div className="statement-feed">
-              {currentDescriptions.length === 0 && (
-                <p className="muted tiny">No sentences on-chain yet this round.</p>
-              )}
-              {currentDescriptions.map((item) => (
-                <div className="statement" key={`${item.round}-${item.account}`}>
-                  <span className="statement-name">{item.name}</span>
-                  <p>{item.text}</p>
-                </div>
-              ))}
-            </div>
+            <p className="composer-hint tiny muted">
+              Sentences land on-chain and appear under each seat at the table.
+            </p>
           </section>
 
           <section className="panel votes-panel">
@@ -1065,11 +1108,220 @@ function GameScreen({
           </section>
         </aside>
       </div>
+      {verdict && (
+        <RoundVerdictOverlay
+          verdict={verdict}
+          snapshot={snapshot}
+          onDismiss={() => setVerdict(null)}
+        />
+      )}
     </main>
   );
 }
 
+function SeatBubble({
+  text,
+  mine,
+  thinking,
+}: {
+  text?: string;
+  mine: boolean;
+  thinking: boolean;
+}) {
+  const typed = useTypewriter(text ?? "");
+  return (
+    <div className={`seat-bubble ${mine ? "mine" : ""} ${text ? "filled" : ""}`}>
+      {text ? (
+        <p>
+          {typed}
+          {typed.length < text.length && <span className="caret" />}
+        </p>
+      ) : mine ? (
+        <span className="tiny muted">your move</span>
+      ) : thinking ? (
+        <span className="thinking">
+          <i />
+          <i />
+          <i />
+        </span>
+      ) : (
+        <span className="tiny muted">no sentence</span>
+      )}
+    </div>
+  );
+}
+
+function useTypewriter(text: string, speed = 16): string {
+  const [shown, setShown] = useState("");
+  useEffect(() => {
+    if (!text) {
+      setShown("");
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShown(text);
+      return;
+    }
+    // Reveal two characters per tick; a 200-character lie lands in under two
+    // seconds while still reading as live typing.
+    let index = 0;
+    setShown("");
+    const timer = setInterval(() => {
+      index = Math.min(text.length, index + 2);
+      setShown(text.slice(0, index));
+      if (index >= text.length) clearInterval(timer);
+    }, speed);
+    return () => clearInterval(timer);
+  }, [text, speed]);
+  return shown;
+}
+
+function voteCounts(snapshot: GameSnapshot, votes: VoteView[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  // Count every seat, including a just-exiled one: the verdict card is rendered
+  // from a snapshot that may already be a phase ahead.
+  for (const player of snapshot.players) {
+    counts.set(player.account, 0);
+  }
+  for (const vote of votes) {
+    if (counts.has(vote.target)) {
+      counts.set(vote.target, (counts.get(vote.target) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
+function TallyPanel({ snapshot }: { snapshot: GameSnapshot }) {
+  const votes = snapshot.votes.filter((vote) => vote.round === snapshot.round);
+  const counts = voteCounts(snapshot, votes);
+  const alive = snapshot.players.filter((player) => player.alive);
+  const max = Math.max(1, ...counts.values());
+  const revealed = new Set(votes.map((vote) => vote.voter)).size;
+  return (
+    <section className="panel tally-panel">
+      <div className="panel-head">
+        <h2>Live tally</h2>
+        <span className="tiny muted">
+          {revealed} / {alive.length} votes revealed
+        </span>
+      </div>
+      <div className="tally-list">
+        {alive.map((player) => {
+          const count = counts.get(player.account) ?? 0;
+          return (
+            <div className={`tally-row ${count === max && count > 0 ? "leading" : ""}`} key={player.account}>
+              <div className="tally-name">
+                <span
+                  className="tally-avatar"
+                  style={{ background: player.agentId ? PERSONA_COLORS[player.agentId] : "#d8e2ff" }}
+                >
+                  {player.name.slice(0, 1)}
+                </span>
+                <span>{player.name}</span>
+              </div>
+              <div className="tally-bar">
+                <i style={{ width: `${(count / max) * 100}%` }} />
+              </div>
+              <strong className="tally-count">{count}</strong>
+            </div>
+          );
+        })}
+      </div>
+      <p className="tiny muted tally-foot">
+        Votes stay sealed until every player reveals. The contract tallies them in
+        one transaction.
+      </p>
+    </section>
+  );
+}
+
+function RoundVerdictOverlay({
+  verdict,
+  snapshot,
+  onDismiss,
+}: {
+  verdict: RoundVerdict;
+  snapshot: GameSnapshot;
+  onDismiss: () => void;
+}) {
+  const exiledName = verdict.exiled ? nameOf(snapshot, verdict.exiled) : null;
+  const counts = voteCounts(snapshot, verdict.votes);
+  const alive = snapshot.players.filter((player) => player.alive || player.account === verdict.exiled);
+  const max = Math.max(1, ...counts.values());
+  return (
+    <div className="verdict-overlay" role="status" aria-live="polite">
+      <div className={`verdict-card ${verdict.exiled ? "has-exile" : "tie"}`}>
+        <span className="tiny verdict-eyebrow">ROUND {verdict.round} · TABLE VERDICT</span>
+        {verdict.exiled ? (
+          <>
+            <span className="verdict-exile">EXILED</span>
+            <h2>{exiledName} is exiled.</h2>
+            {verdict.role ? (
+              <div className="verdict-role">
+                <div className={`flip-card ${verdict.role}`}>
+                  <div className="flip-face flip-back">
+                    <span className="flip-mark">AU</span>
+                    <span className="tiny">SEALED ROLE</span>
+                  </div>
+                  <div className={`flip-face flip-front ${verdict.role}`}>
+                    <span className="tiny">THEIR ROLE</span>
+                    <strong>{verdict.role.toUpperCase()}</strong>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="verdict-stamp">EXILED</div>
+            )}
+            {verdict.role === "impostor" ? (
+              <p className="verdict-line good">The table found the liar.</p>
+            ) : (
+              <p className="verdict-line bad">Wrong seat. The impostor is still in the room.</p>
+            )}
+          </>
+        ) : (
+          <>
+            <h2>Split vote.</h2>
+            <div className="verdict-stamp tie">NO EXILE</div>
+            <p className="verdict-line">No majority. Everyone stays — and the lies continue.</p>
+          </>
+        )}
+        <div className="verdict-tally">
+          {alive.map((player) => {
+            const count = counts.get(player.account) ?? 0;
+            return (
+              <div className="verdict-bar" key={player.account}>
+                <span className="tiny">{player.name}</span>
+                <div>
+                  <i
+                    className={player.account === verdict.exiled ? "exiled" : ""}
+                    style={{ width: `${(count / max) * 100}%` }}
+                  />
+                </div>
+                <strong className="tiny">{count}</strong>
+              </div>
+            );
+          })}
+        </div>
+        <button className="btn btn-ghost btn-small verdict-dismiss" onClick={onDismiss}>
+          Back to the table
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SecretCard({ privateView, phase }: { privateView: PrivatePlayerView | null; phase: Phase }) {
+  const [flipped, setFlipped] = useState(false);
+  useEffect(() => {
+    if (!privateView) {
+      setFlipped(false);
+      return;
+    }
+    // Let the sealed back of the card land before turning it over.
+    const timer = setTimeout(() => setFlipped(true), 750);
+    return () => clearTimeout(timer);
+  }, [privateView?.word, privateView?.role]);
+
   if (!privateView) {
     return (
       <section className="panel secret-card">
@@ -1082,21 +1334,29 @@ function SecretCard({ privateView, phase }: { privateView: PrivatePlayerView | n
   }
   const impostor = privateView.role === "impostor";
   return (
-    <section className={`secret-card ${impostor ? "impostor" : "crew"}`}>
-      <div className="secret-head">
-        <span className="tiny">YOUR ROLE</span>
-        <span className={`role-pill ${impostor ? "impostor" : "crew"}`}>
-          {impostor ? "IMPOSTOR" : "CREW"}
-        </span>
+    <div className="secret-card-shell">
+      <div className={`secret-card-inner ${flipped ? "flipped" : ""}`}>
+        <div className="secret-face secret-back">
+          <span className="card-back-mark">AU</span>
+          <span className="tiny muted">DEALING YOUR ROLE</span>
+        </div>
+        <section className={`secret-face secret-front secret-card ${impostor ? "impostor" : "crew"}`}>
+          <div className="secret-head">
+            <span className="tiny">YOUR ROLE</span>
+            <span className={`role-pill ${impostor ? "impostor" : "crew"}`}>
+              {impostor ? "IMPOSTOR" : "CREW"}
+            </span>
+          </div>
+          <div className="word">{privateView.word}</div>
+          <p className="secret-note">
+            {impostor
+              ? "The crew has a similar word. Blend in, mirror their confidence, never say your own word."
+              : "Find the seat whose sentence bends away from this word. Do not say the word itself."}
+          </p>
+          <div className="secret-foot tiny muted">{PHASE_LABEL[phase]} · keep this card to yourself</div>
+        </section>
       </div>
-      <div className="word">{privateView.word}</div>
-      <p className="secret-note">
-        {impostor
-          ? "The crew has a similar word. Blend in, mirror their confidence, never say your own word."
-          : "Find the seat whose sentence bends away from this word. Do not say the word itself."}
-      </p>
-      <div className="secret-foot tiny muted">{PHASE_LABEL[phase]} · keep this card to yourself</div>
-    </section>
+    </div>
   );
 }
 
@@ -1182,6 +1442,10 @@ function ResultScreen({
               you were {myRole.toUpperCase()}
             </span>
           )}
+        </div>
+        <div className={`case-stamp ${crewWon ? "caught" : "escaped"}`}>
+          <span>{crewWon ? "IMPOSTOR CAUGHT" : "IMPOSTOR ESCAPED"}</span>
+          <small>CASE CLOSED</small>
         </div>
       </section>
 

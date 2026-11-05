@@ -124,6 +124,9 @@ export interface GameSnapshot {
   votes: VoteView[];
   exiles: string[];
   pendingExile: string | null;
+  /** Roles the table has already seen: exiled seats, plus the pending exile
+      during its reveal. Never includes living players. */
+  revealedRoles: Record<string, Role>;
   winningSide: Side | null;
   winners: string[];
   phaseDeadline: number;

@@ -505,6 +505,10 @@ export class GameSession {
       }
     }
 
+    // Publish the votes that just landed. Without this the next snapshot only
+    // arrives once the phase has already flipped, so the live tally would stay
+    // at zero and then jump straight to the verdict.
+    await this.refreshRound(room.round);
     await this.maybeForceAdvance(room);
   }
 
@@ -658,6 +662,18 @@ export class GameSession {
       };
     });
 
+    // Only reveal roles the table has already earned: exiled seats, and the
+    // pending exile while its reveal is being written. Living roles stay local.
+    const revealedRoles: Record<string, Role> = {};
+    for (const seat of this.seats) {
+      if (
+        room.exiles.includes(seat.account) ||
+        (room.phase === "rolereveal" && room.pending_exile === seat.account)
+      ) {
+        revealedRoles[seat.account] = seat.role;
+      }
+    }
+
     return {
       roomId: room.id,
       phase: room.phase,
@@ -670,6 +686,7 @@ export class GameSession {
       votes,
       exiles: room.exiles,
       pendingExile: room.pending_exile,
+      revealedRoles,
       winningSide: room.winning_side as Side | null,
       winners: room.winners,
       phaseDeadline: room.phase_deadline,
