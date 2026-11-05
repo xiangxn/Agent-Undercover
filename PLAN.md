@@ -12,12 +12,12 @@
 ## 1. 成功标准（Definition of Done）
 
 - [ ] 公开 GitHub repo，含 MIT LICENSE，README 可让陌生人从零跑起来
-- [ ] 合约部署在 NEAR Testnet，地址写进 README
-- [ ] 4 个 Agent 持久子账户，`view_access_keys` 显示只有 scoped FunctionCall key，无 full-access key
+- [x] 合约部署在 NEAR Testnet，地址写进 README（`game.agent-undercover.testnet` 已部署并初始化）
+- [x] 4 个 Agent 持久子账户，`view_access_keys` 显示只有 scoped FunctionCall key，无 full-access key（2026-11-05 raw RPC 复核：每个账户恰好两个 FunctionCall key）
 - [x] `pnpm demo:scripted` 不需要 AI API key，能在 Testnet 跑完一局 5 人局并结算（2026-11-05 复跑 exit 0：Crew 胜，4 winners，5 条描述 / 5 个 reveal）
 - [ ] `DEMO_MODE=live` 用 NEAR AI Cloud 跑完一局，AI 输出可读、可回放
-- [ ] 浏览器里 1 真人 + 4 Agent 完整玩一局：质押 → 描述 → commit-reveal 投票 → 放逐 → 结算
-- [ ] 结果页展示：胜方、分账、Agent 余额变化、Explorer 链接、AI 私有推理回放
+- [x] 浏览器里 1 真人 + 4 Agent 完整玩一局：质押 → 描述 → commit-reveal 投票 → 放逐 → 结算（2026-11-05 run 20 完整走通）
+- [x] 结果页展示：胜方、分账、Agent 余额变化、Explorer 链接、AI 私有推理回放（2026-11-05 run 20：7 张推理卡，0 console error）
 - [ ] 60–90 秒 demo 视频已发布到 X，满足 HACKATHON.md 的 tag 要求
 - [ ] 提交 payload 已打印并由 human 确认，POST 返回 201
 - [ ] Hosted demo（加分项）保持可访问到 2026-11-18
@@ -304,7 +304,7 @@
 
 - [x] README 的每条命令在干净目录执行过（2026-11-05：install / build / typecheck / test / demo / dev:server 健康检查）
 - [x] `.env.example` 每个变量有说明（2026-11-05 补 `TREASURY_FLOOR_NEAR` / `MAX_SESSIONS`）
-- [ ] 不需要主网、不需要付费服务即可看 scripted demo
+- [x] 不需要主网、不需要付费服务即可看 scripted demo（Testnet faucet 免费；`DEMO_MODE=scripted` 无 AI key）
 - [ ] 合约地址和交易 hash 可在 Explorer 打开
 - [ ] 视频链接、hosted demo 链接、repo 链接都可匿名访问
 
