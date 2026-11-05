@@ -46,20 +46,30 @@ export async function decideTurn(input: TurnInput): Promise<TurnDecision> {
     return scriptedDecision(input);
   }
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // Three attempts: a reasoning model occasionally spends the whole answer on
+  // hidden thought, names a dead suspect, or slips its own word into the line.
+  let correction =
+    "Your previous answer was invalid. Return valid JSON and a valid living target account.";
+  for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const raw = await callNearAi(input, attempt === 0 ? undefined : "Your previous answer was invalid. Return valid JSON and a valid living target account.");
-      const parsed = parseDecision(raw, input);
-      if (parsed) {
-        await logTurn(input, raw, parsed);
-        return parsed;
+      const raw = await callNearAi(input, attempt === 0 ? undefined : correction);
+      const result = parseDecision(raw, input);
+      if (result.ok) {
+        await logTurn(input, raw, result.decision);
+        return result.decision;
       }
+      correction = `Your previous answer was invalid: ${result.error}. Return valid JSON matching the schema. The description must not contain your secret word; the suspect must be a living player other than you.`;
+      await logTurn(input, `INVALID: ${raw}`, null);
     } catch (error) {
       await logTurn(input, `ERROR: ${String(error)}`, null);
-      if (attempt === 1) break;
+      if (attempt === 2) break;
     }
   }
-  return scriptedDecision(input);
+  const fallback = scriptedDecision(input);
+  // Record fallbacks too: during a recorded live demo they are still visible
+  // as "thinking (scripted)" in the chain feed, and the log says why.
+  await logTurn(input, "FALLBACK: scripted", fallback);
+  return fallback;
 }
 
 function systemPrompt(input: TurnInput): string {
@@ -136,39 +146,77 @@ async function callNearAi(input: TurnInput, correction?: string): Promise<string
   }
 }
 
-function parseDecision(raw: string, input: TurnInput): TurnDecision | null {
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+type ParseResult =
+  | { ok: true; decision: TurnDecision }
+  | { ok: false; error: string };
+
+function parseDecision(raw: string, input: TurnInput): ParseResult {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
-  if (start < 0 || end <= start) return null;
+  if (start < 0 || end <= start) {
+    return { ok: false, error: "the answer was not JSON" };
+  }
   let value: { description?: unknown; suspect?: unknown; reasoning?: unknown };
   try {
     value = JSON.parse(raw.slice(start, end + 1));
   } catch {
-    return null;
+    return { ok: false, error: "the answer was not valid JSON" };
   }
-  if (typeof value.description !== "string") return null;
+  if (typeof value.description !== "string") {
+    return { ok: false, error: "description was missing" };
+  }
   const description = value.description.trim().replace(/\s+/g, " ");
-  if (!description || Buffer.byteLength(description, "utf8") > 280) return null;
-  if (description.toLowerCase().includes(input.word.toLowerCase())) return null;
-
-  let target = typeof value.suspect === "string" ? value.suspect.trim() : "";
-  if (!input.alive.some((seat) => seat.account === target)) {
-    const byName = input.alive.find(
-      (seat) => seat.name.toLowerCase() === target.toLowerCase(),
-    );
-    target = byName?.account ?? "";
+  if (!description) return { ok: false, error: "description was empty" };
+  if (Buffer.byteLength(description, "utf8") > 280) {
+    return { ok: false, error: "description was longer than 280 bytes" };
   }
-  if (!target || target === input.agent.accountId) return null;
-  if (!input.alive.some((seat) => seat.account === target)) return null;
+  // Substring matching rejected innocent words that contain the secret word
+  // ("communicates" contains "cat"), which burned retries and fell back to
+  // scripted. Match the word as a whole word instead.
+  const secretWord = new RegExp(
+    `\\b${escapeRegExp(input.word)}\\b`,
+    "i",
+  );
+  if (secretWord.test(description)) {
+    return { ok: false, error: "the description contained the secret word" };
+  }
+
+  // Models sometimes answer "Necklace (smw3...testnet)" instead of the bare
+  // account. Accept an account substring or a display name, not just an exact
+  // match, so a good answer is not thrown away on formatting.
+  const rawSuspect = typeof value.suspect === "string" ? value.suspect.trim() : "";
+  const suspectLower = rawSuspect.toLowerCase();
+  const byAccount = input.alive.find((seat) => rawSuspect.includes(seat.account));
+  const byName = input.alive.find((seat) => {
+    const name = seat.name.toLowerCase();
+    return (
+      suspectLower === name ||
+      suspectLower.startsWith(`${name} `) ||
+      suspectLower.startsWith(`${name}(`) ||
+      suspectLower === `${name}s`
+    );
+  });
+  const target = byAccount?.account ?? byName?.account ?? "";
+  if (!target) return { ok: false, error: "the suspect was not a living player" };
+  if (target === input.agent.accountId) {
+    return { ok: false, error: "the suspect was the agent itself" };
+  }
 
   return {
-    description,
-    target,
-    reasoning:
-      typeof value.reasoning === "string"
-        ? value.reasoning.trim()
-        : "Private read unavailable.",
-    source: "ai",
+    ok: true,
+    decision: {
+      description,
+      target,
+      reasoning:
+        typeof value.reasoning === "string"
+          ? value.reasoning.trim()
+          : "Private read unavailable.",
+      source: "ai",
+    },
   };
 }
 
