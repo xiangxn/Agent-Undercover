@@ -61,17 +61,17 @@
 **目标：repo 能编译、Testnet 能部署、Agent 账户能建**
 
 - [x] PRD / PLAN 定稿
-- [ ] 目录骨架：`contract/`、`server/`、`web/`、`shared/`、`scripts/`、`docs/`
-- [ ] 根 `package.json` + `pnpm-workspace.yaml`
-- [ ] `.gitignore`（`.env`、`.keys/`、`runs/`、`target/`、`node_modules/`、`dist/`）
-- [ ] LICENSE（MIT）
-- [ ] `README.md` 骨架（英文标题、one-liner、run 占位）
-- [ ] 安装 `wasm32-unknown-unknown`
-- [ ] Testnet master 账户（faucet）+ 合约子账户
-- [ ] 4 个 Agent 子账户：scoped FunctionCall key，无 full-access key
-- [ ] 最小合约部署，`get_room_count` 可读
-- [ ] `RULES.md` / `ARCHITECTURE.md` 初版
-- [ ] 验收：`cargo test` 通过；合约地址可查；`view_access_keys(agent)` 只有 FunctionCall key
+- [x] 目录骨架：`contract/`、`server/`、`web/`、`shared/`、`scripts/`、`docs/`
+- [x] 根 `package.json` + `pnpm-workspace.yaml`
+- [x] `.gitignore`（`.env`、`.keys/`、`runs/`、`target/`、`node_modules/`、`dist/`）
+- [x] LICENSE（MIT）
+- [x] `README.md` 骨架（英文标题、one-liner、run 占位）
+- [x] 安装 `wasm32-unknown-unknown`
+- [x] Testnet master 账户（faucet）+ 合约子账户
+- [x] 4 个 Agent 子账户：scoped FunctionCall key，无 full-access key
+- [x] 最小合约部署，`get_room_count` 可读
+- [x] `RULES.md` / `ARCHITECTURE.md` 初版
+- [x] 验收：`cargo test` 通过；合约地址可查；`view_access_keys(agent)` 只有 FunctionCall key
 
 **如果今天建号/部署卡住**：优先保证 master + 合约账户；Agent 账户顺延到 Day 2 上午。
 
@@ -79,39 +79,43 @@
 
 **目标：合约 v1 + 脚本在 Testnet 跑完一局（M1）**
 
-- [ ] 合约：create/join/start、description、commit/reveal、tally、reveal_role、advance、settle、refund、views
-- [ ] 单测：完整 5 人局、平票、错误哈希、重复提交、投自己、超时退款、分账余数
-- [ ] `scripts/demo-scripted.ts`：建房间 → 4 Agent join → start → 3 轮 → settle
-- [ ] 打印交易 hash、Explorer 链接、最终余额、Agent stats
-- [ ] Backend skeleton：Express + Socket.IO + 合约客户端 + Agent signer
-- [ ] 验收：一局完整跑通；`Settled`；Agent 余额变化与分账一致；M1 成立
+- [x] 合约：create/join/start、description、commit/reveal、tally、reveal_role、advance、settle、refund、views
+- [x] 单测：完整 5 人局、平票、错误哈希、重复提交、投自己、超时退款、分账余数
+- [x] `scripts/demo-scripted.mjs`：建房间 → 4 Agent join → start → 3 轮 → settle
+- [x] 打印交易 hash、Explorer 链接、最终余额、Agent stats
+- [x] Backend skeleton：Express + Socket.IO + 合约客户端 + Agent signer
+- [x] 验收：一局完整跑通；`Settled`；Agent 余额变化与分账一致；M1 成立
 
 ### Day 3 · 11-07
 
 **目标：Backend + AI + 浏览器最小闭环（M2）**
 
-- [ ] Session 账户 API：浏览器公钥 → 建号 + scoped key + 充值
-- [ ] Relay API：广播浏览器签名交易
-- [ ] 房间管理器：内存状态 + 合约同步
-- [ ] NEAR AI Cloud 客户端：OpenAI 兼容、20s 超时、重试 1 次
-- [ ] 4 个 persona；卧底 strategy → utterance 两段式
-- [ ] 输出校验：长度、不含自己的词、投票合法；失败 fallback
-- [ ] `runs/<room>.jsonl` 记录 reasoning
-- [ ] Frontend v1：Landing/Lobby/Game/Result + Socket.IO + session key
-- [ ] 验收：浏览器能加入并看到状态；`DEMO_MODE=live` 跑完一局；无 key 自动 fallback
+- [x] Session 账户 API：浏览器公钥 → 建号 + 充值（full-access 仅存在于浏览器内存）
+- [x] Relay API：广播浏览器签名交易
+- [x] 房间管理器：内存状态 + 合约同步
+- [x] NEAR AI Cloud 客户端：OpenAI 兼容、超时/重试、无 key fallback
+- [x] 4 个 persona；卧底 strategy → utterance 两段式
+- [x] 输出校验：长度、不含自己的词、投票合法；失败 fallback
+- [x] `runs/<room>.jsonl` 记录 reasoning
+- [x] Frontend v1：Landing/Lobby/Game/Result + Socket.IO + session key
+- [ ] 验收：浏览器能加入并看到状态；`DEMO_MODE=live` 跑完一局；无 key 自动 fallback（scripted 已跑通，live 待 NEAR_AI_API_KEY）
 
 ### Day 4 · 11-08
 
 **目标：完整一局 + 结果页 + 稳定性；功能冻结（M3）**
 
-- [ ] 结果页：胜方、分账、Agent 余额变化、Explorer、AI reasoning 回放
-- [ ] Agent 战绩/收益展示（可合并到结果页）
-- [ ] 错误态、重连、超时、空房间、计时器
-- [ ] 连续跑 3 局无手动干预；无 console error
+- [x] 结果页：胜方、分账、Agent 余额变化、Explorer、AI reasoning 回放
+- [x] Agent 战绩/收益展示（可合并到结果页）
+- [x] 交易可靠性：FastNear 的 `waitUntil: "NONE"` 会静默丢交易（2026-11-05 用 0.001 NEAR 转账复现）；浏览器改回 `INCLUDED`，create_room/描述/投票失败时轮询链上确认
+- [x] 错误文案：`timed out` 正确归入 RPC 超时提示；描述/投票的恢复轮询延长到 25s
+- [x] 刷新恢复：Vote commit 阶段刷新页面，`game:watch` 重连并恢复状态（2026-11-05 run 15 完整结算）
+- [x] RPC 中继：上游 408/5xx 转成 JSON-RPC error（HTTP 200），避免浏览器 console error；45s 安全超时；FastNear 约 30s 的 408 仍会落链，提前 abort 会取消广播
+- [ ] 错误态、重连、超时、空房间、计时器（重连/计时器/刷新恢复已过；空房间未压测）
+- [ ] 连续跑 3 局无手动干预；无 console error（1/3：run 13 Crew 胜、7 张推理卡、无 console error）
 - [ ] README v1（run steps、架构、trust model、track mapping）
 - [ ] Hosted deploy 尝试（Backend + Web）；失败不阻塞
 - [ ] **23:59 UTC 功能冻结**
-- [ ] 验收：1 真人 + 4 Agent 完整一局；fresh clone 的 scripted demo 成功
+- [x] 验收：1 真人 + 4 Agent 完整一局（2026-11-05 浏览器 smoke：Crew 胜，分账正确，无 console error）；fresh clone 的 scripted demo 待最终验证
 
 ### Day 5 · 11-09
 
@@ -136,7 +140,7 @@
 ### 4.1 Repo / 代码
 
 - [ ] 公开 GitHub repo，URL 可匿名访问
-- [ ] LICENSE（MIT）
+- [x] LICENSE（MIT）
 - [ ] README 英文，含：
   - [ ] 产品是什么、解决什么问题
   - [ ] “do X - see Y” 的可复现步骤
@@ -265,30 +269,31 @@
 
 ### 8.1 合约
 
-- [ ] `cargo test`：完整 5 人局
-- [ ] 平票 → 无人放逐
-- [ ] 错误哈希 → 拒绝
-- [ ] 重复 commit/reveal → 拒绝
-- [ ] 投自己 → 拒绝
-- [ ] 未到 deadline 退款 → 拒绝
-- [ ] 超时退款 → 每人拿回 stake
-- [ ] 1 卧底被放逐 → Crew 胜；卧底存活到 3 轮 → Impostor 胜
-- [ ] 分账总额 == pot；余数处理正确
-- [ ] Agent stats 只对 is_agent 更新
+- [x] `cargo test`：完整 5 人局
+- [x] 平票 → 无人放逐
+- [x] 错误哈希 → 拒绝
+- [x] 重复 commit/reveal → 拒绝（单测）
+- [x] 投自己 → 拒绝（单测）
+- [x] 未到 deadline 退款 → 拒绝（单测）
+- [x] 超时退款 → 每人拿回 stake
+- [x] 1 卧底被放逐 → Crew 胜（单测）
+- [x] 卧底存活到轮次上限 → Impostor 胜（单测）
+- [x] 分账总额 == pot；余数处理正确
+- [x] Agent stats 只对 is_agent 更新
 
 ### 8.2 端到端
 
-- [ ] `pnpm demo:scripted`：无 AI key，Testnet 完整一局
+- [x] `pnpm demo:scripted`：无 AI key，Testnet 完整一局
 - [ ] `DEMO_MODE=live`：真实 AI 完整一局
-- [ ] 浏览器：1 真人 + 4 Agent 完整一局
+- [x] 浏览器：1 真人 + 4 Agent 完整一局（2026-11-05）
 - [ ] 断网/无 key → fallback 到 scripted
-- [ ] 刷新页面 → 重连并恢复状态
+- [x] 刷新页面 → 重连并恢复状态（2026-11-05）
 - [ ] 新 clone → 按 README 跑通 scripted
 
 ### 8.3 评委可复现性
 
 - [ ] README 的每条命令在干净目录执行过
-- [ ] `.env.example` 每个变量有说明
+- [ ] `.env.example` 每个变量有说明（已补齐 treasury/top-up 变量，待逐项注释）
 - [ ] 不需要主网、不需要付费服务即可看 scripted demo
 - [ ] 合约地址和交易 hash 可在 Explorer 打开
 - [ ] 视频链接、hosted demo 链接、repo 链接都可匿名访问
@@ -351,4 +356,4 @@
 
 其余已锁定：项目名 Agent Undercover；leadName Necklace；email necklace1982@gmail.com；payout `x-bit.near`。
 
-**下一步**：D1 —— repo 骨架 + Testnet 建号 + 合约 skeleton。立即开始。
+**下一步**：D4 —— 浏览器完整一局加固、连续 3 局、README v1、hosted deploy。
